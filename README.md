@@ -1,36 +1,34 @@
-# Turborepo starter
+# GitBee
 
-This Turborepo starter is maintained by the Turborepo core team.
+A GitHub bot built with TypeScript and Bun, designed to automate interactions with GitHub issues, pull requests, and discussions.
 
-## Using this example
+## Quick Start
 
-Run the following command:
+### For GitHub Bot Development
 
-```sh
-npx create-turbo@latest
-```
+To set up and run the GitHub bot locally with ngrok tunneling:
 
-## What's inside?
+1. See the detailed setup guide: [apps/bot/SETUP.md](apps/bot/SETUP.md)
+2. Run the bot:
+   ```bash
+   bun run dev:bot
+   # or
+   bun run bot:dev
+   ```
 
-This Turborepo includes the following packages/apps:
+### Repository Structure
 
-### Apps and Packages
+This is a Turborepo monorepo containing:
 
-- `docs`: a [Next.js](https://nextjs.org/) app
-- `web`: another [Next.js](https://nextjs.org/) app
-- `@repo/ui`: a stub React component library shared by both `web` and `docs` applications
-- `@repo/eslint-config`: `eslint` configurations (includes `eslint-config-next` and `eslint-config-prettier`)
-- `@repo/typescript-config`: `tsconfig.json`s used throughout the monorepo
+- **apps/bot**: GitHub App bot that responds to webhook events
+- **apps/web**: Web application (Next.js)
+- **packages/octokit**: GitHub API client wrapper
+- **packages/ai**: AI/ML related utilities
+- **packages/db**: Database utilities
+- **packages/queue**: Queue management
+- **packages/vector-db**: Vector database utilities
 
-Each package/app is 100% [TypeScript](https://www.typescriptlang.org/).
-
-### Utilities
-
-This Turborepo has some additional tools already setup for you:
-
-- [TypeScript](https://www.typescriptlang.org/) for static type checking
-- [ESLint](https://eslint.org/) for code linting
-- [Prettier](https://prettier.io) for code formatting
+## Development
 
 ### Build
 
