@@ -159,6 +159,8 @@ The bot should now be running at `http://localhost:4000` and accessible via your
 
 ## Troubleshooting
 
+For a comprehensive troubleshooting checklist, see [TROUBLESHOOTING.md](TROUBLESHOOTING.md).
+
 ### Bot not receiving webhooks
 
 1. Check that ngrok is running and the URL is correct in GitHub App settings
