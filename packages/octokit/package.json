@@ -1,0 +1,15 @@
+{
+  "name": "@gitbee/octokit",
+  "module": "index.ts",
+  "type": "module",
+  "private": true,
+  "devDependencies": {
+    "@types/bun": "latest"
+  },
+  "peerDependencies": {
+    "typescript": "^5"
+  },
+  "dependencies": {
+    "octokit": "^5.0.5"
+  }
+}

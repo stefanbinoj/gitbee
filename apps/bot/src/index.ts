@@ -1,0 +1,13 @@
+import { Elysia } from "elysia";
+import { userRouter } from "./routes/user";
+import { todoRouter } from "./routes/todo";
+
+const apiRouter = new Elysia({ prefix: "/api" })
+  .use(userRouter)
+  .use(todoRouter);
+
+const app = new Elysia().use(apiRouter).listen(4000);
+
+console.log(
+  `🦊 Elysia is running at ${app.server?.hostname}:${app.server?.port}`,
+);
