@@ -123,6 +123,8 @@ You can run the bot in two ways:
 
 ### Option 1: From the root directory
 ```bash
+bun run dev:bot
+# or
 bun run bot:dev
 ```
 
@@ -139,8 +141,8 @@ The bot should now be running at `http://localhost:4000` and accessible via your
 1. Check the console output for initialization logs:
    ```
    Initializing GitHub App with ID: 123456
-   Webhook Secret: your_webhook_secret_here
-   Private Key Loaded: -----BEGIN RSA PRIVATE KEY-----...
+   Webhook Secret: ✓
+   Private Key Loaded: ✓
    🦊 Elysia is running at localhost:4000
    ```
 
@@ -188,7 +190,7 @@ ngrok http NEW_PORT
 ## Development Workflow
 
 1. Keep ngrok running in a terminal
-2. Run the bot with `bun run bot:dev` (from root) or `bun run dev` (from apps/bot)
+2. Run the bot with `bun run dev:bot` (from root) or `bun run dev` (from apps/bot)
 3. Make changes to the code - the bot will automatically reload thanks to the `--watch` flag
 4. Test your changes by triggering events in your GitHub repository
 
