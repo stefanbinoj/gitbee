@@ -11,6 +11,10 @@ app.webhooks.on("issues.opened", async ({ octokit, payload }) => {
   });
 });
 
+app.webhooks.on("installation_repositories.added", async ({ octokit, payload }) => {
+  console.log("Repositories added to installation:", payload.repositories_added);
+});
+
 // Pull request events
 app.webhooks.on("pull_request.opened", ({ octokit, payload }) => {
   console.log("Pull request opened:", payload.pull_request.title);

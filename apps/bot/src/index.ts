@@ -2,6 +2,7 @@ import { Elysia } from "elysia";
 import { userRouter } from "./routes/user";
 import { todoRouter } from "./routes/todo";
 import { webhookRouter } from "./routes/webhook";
+import "./botActions";
 
 const apiRouter = new Elysia({ prefix: "/api" })
   .use(userRouter)
