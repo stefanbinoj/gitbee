@@ -4,6 +4,7 @@
   "type": "module",
   "private": true,
   "devDependencies": {
+    "@types/amqplib": "^0.10.8",
     "@types/bun": "latest"
   },
   "peerDependencies": {
