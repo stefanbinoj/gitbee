@@ -1,11 +1,5 @@
 import { app } from "@gitbee/octokit";
 
-// Register event handlers
-app.webhooks.on("push", async ({ octokit, payload }) => {
-  console.log("Push event received:", payload.repository.full_name);
-  // Add your bot logic here, e.g., comment on PR, run CI, etc.
-});
-
 app.webhooks.on("issues.opened", async ({ octokit, payload }) => {
   console.log("Issue opened:", payload.issue.title);
   // Example: Add a comment
@@ -17,18 +11,71 @@ app.webhooks.on("issues.opened", async ({ octokit, payload }) => {
   });
 });
 
-app.webhooks.on("pull_request.opened", async ({ octokit, payload }) => {
-  if (payload.pull_request.merged) {
-    console.log("Pull request merged:", payload.pull_request.title);
-    // Example: Add a label to the PR
-    await octokit.rest.issues.addLabels({
-      owner: payload.repository.owner.login,
-      repo: payload.repository.name,
-      issue_number: payload.pull_request.number,
-      labels: ["merged"],
-    });
-  }
+// Pull request events
+app.webhooks.on("pull_request.opened", ({ octokit, payload }) => {
+  console.log("Pull request opened:", payload.pull_request.title);
+  console.log("Pull request opened:");
 });
 
-// app.webhooks.on("issues.opened", handleIssueOpened);
-// app.webhooks.on("issue_comment.created", handleIssueCommentCreated);
+app.webhooks.on("pull_request.edited", ({ octokit, payload }) => {
+  console.log("Pull request edited:", payload.pull_request.title);
+  console.log("Pull request edited:");
+});
+
+app.webhooks.on("pull_request.reopened", ({ octokit, payload }) => {
+  console.log("Pull request reopened:", payload.pull_request.title);
+  console.log("Pull request reopened:");
+});
+
+// Issue events
+app.webhooks.on("issues.opened", ({ octokit, payload }) => {
+  console.log("Issue opened:", payload.issue.title);
+  console.log("Issue opened:");
+});
+
+app.webhooks.on("issues.edited", ({ octokit, payload }) => {
+  console.log("Issue edited:", payload.issue.title);
+  console.log("Issue edited:");
+});
+
+app.webhooks.on("issues.reopened", ({ octokit, payload }) => {
+  console.log("Issue reopened:", payload.issue.title);
+  console.log("Issue reopened:");
+});
+
+// Issue comment events
+app.webhooks.on("issue_comment.created", ({ octokit, payload }) => {
+  console.log("Issue comment created:", payload.comment.body);
+  console.log("Issue comment created:");
+});
+
+app.webhooks.on("issue_comment.edited", ({ octokit, payload }) => {
+  console.log("Issue comment edited:", payload.comment.body);
+  console.log("Issue comment edited:");
+});
+
+// Discussion events
+app.webhooks.on("discussion.created", ({ octokit, payload }) => {
+  console.log("Discussion created:", payload);
+  console.log("Discussion created:");
+});
+
+app.webhooks.on("discussion.edited", ({ octokit, payload }) => {
+  console.log("Discussion comment created:", payload);
+  console.log("Discussion comment created:");
+});
+
+app.webhooks.on("discussion.reopened", ({ octokit, payload }) => {
+  console.log("Discussion comment created:", payload);
+  console.log("Discussion comment created:");
+});
+
+// Discussion comment events
+app.webhooks.on("discussion_comment.created", ({ octokit, payload }) => {
+  console.log("Discussion comment created:", payload);
+  console.log("Discussion comment created:");
+});
+app.webhooks.on("discussion_comment.edited", ({ octokit, payload }) => {
+  console.log("Discussion comment created:", payload);
+  console.log("Discussion comment created:");
+});
