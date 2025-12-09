@@ -32,7 +32,7 @@ app.webhooks.on("installation", async ({ octokit, payload }) => {
 
     // Check if installation already exists
     const existingInstallation = await db.query.installationSchema.findFirst({
-      where: eq(installationSchema.installationId, installationId),
+      where: eq(installationSchema.targetId, targetId),
     });
     console.log("Is this a reinstallation?", !!existingInstallation);
 
@@ -43,6 +43,7 @@ app.webhooks.on("installation", async ({ octokit, payload }) => {
         .set({
           isRemoved: false,
           removedAt: null,
+          installationId: installationId,
           targetType: targetType,
           targetLogin: targetLogin,
           repositorySelection: repossitorySelection,
@@ -51,7 +52,7 @@ app.webhooks.on("installation", async ({ octokit, payload }) => {
           senderType: senderType,
           updatedAt: new Date(),
         })
-        .where(eq(installationSchema.installationId, installationId));
+        .where(eq(installationSchema.targetId, targetId));
 
       // Upsert repositories - insert or update if exists
       await Promise.all(
@@ -59,7 +60,7 @@ app.webhooks.on("installation", async ({ octokit, payload }) => {
           db
             .insert(installationRepositoriesSchema)
             .values({
-              installationId: installationId,
+              targetId: targetId,
               repositoryId: repo.id,
               repositoryFullName: repo.full_name,
               repositoryVisibility: repo.private ? "private" : "public",
@@ -71,7 +72,7 @@ app.webhooks.on("installation", async ({ octokit, payload }) => {
                 removedAt: null,
                 repositoryFullName: repo.full_name,
                 repositoryVisibility: repo.private ? "private" : "public",
-                installationId: installationId,
+                targetId: targetId,
               },
             }),
         ),
@@ -93,7 +94,7 @@ app.webhooks.on("installation", async ({ octokit, payload }) => {
       await Promise.all(
         repositoriesSelected.map((repo: any) =>
           db.insert(installationRepositoriesSchema).values({
-            installationId: installationId,
+            targetId: targetId,
             repositoryId: repo.id,
             repositoryFullName: repo.full_name,
             repositoryVisibility: repo.private ? "private" : "public",
@@ -129,14 +130,14 @@ app.webhooks.on("installation", async ({ octokit, payload }) => {
         isRemoved: true,
         removedAt: new Date(),
       })
-      .where(eq(installationSchema.installationId, installationId));
+      .where(eq(installationSchema.targetId, targetId));
     await db
       .update(installationRepositoriesSchema)
       .set({
         isRemoved: true,
         removedAt: new Date(),
       })
-      .where(eq(installationRepositoriesSchema.installationId, installationId));
+      .where(eq(installationRepositoriesSchema.targetId, targetId));
   }
 });
 

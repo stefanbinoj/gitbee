@@ -5,15 +5,8 @@
     {
       "idx": 0,
       "version": "7",
-      "when": 1765094255463,
-      "tag": "0000_equal_puppet_master",
-      "breakpoints": true
-    },
-    {
-      "idx": 1,
-      "version": "7",
-      "when": 1765264355119,
-      "tag": "0001_lonely_wild_child",
+      "when": 1765267729672,
+      "tag": "0000_common_bug",
       "breakpoints": true
     }
   ]

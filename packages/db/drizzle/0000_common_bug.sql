@@ -1,3 +1,6 @@
+CREATE TYPE "account_type" AS ENUM ('User', 'Organization', 'Bot');--> statement-breakpoint
+CREATE TYPE "repository_selection" AS ENUM ('all', 'selected');--> statement-breakpoint
+CREATE TYPE "repository_visibility" AS ENUM ('private', 'public');--> statement-breakpoint
 CREATE TABLE "account" (
 	"id" text PRIMARY KEY NOT NULL,
 	"account_id" text NOT NULL,
@@ -46,8 +49,40 @@ CREATE TABLE "verification" (
 	"updated_at" timestamp DEFAULT now() NOT NULL
 );
 --> statement-breakpoint
+CREATE TABLE "installation_repositories" (
+	"id" serial PRIMARY KEY NOT NULL,
+	"target_id" integer NOT NULL,
+	"repository_id" integer NOT NULL,
+	"repository_full_name" text NOT NULL,
+	"repository_visibility" "repository_visibility" NOT NULL,
+	"added_at" timestamp DEFAULT now() NOT NULL,
+	"removed_at" timestamp,
+	"is_removed" boolean DEFAULT false NOT NULL,
+	CONSTRAINT "installation_repositories_repository_id_unique" UNIQUE("repository_id")
+);
+--> statement-breakpoint
+CREATE TABLE "installations" (
+	"id" serial PRIMARY KEY NOT NULL,
+	"installation_id" integer NOT NULL,
+	"target_type" "account_type" NOT NULL,
+	"target_login" text NOT NULL,
+	"target_id" integer NOT NULL,
+	"repository_selection" "repository_selection" NOT NULL,
+	"sender_login" text,
+	"sender_id" integer,
+	"sender_type" "account_type",
+	"is_removed" boolean DEFAULT false NOT NULL,
+	"created_at" timestamp DEFAULT now() NOT NULL,
+	"updated_at" timestamp DEFAULT now() NOT NULL,
+	"removed_at" timestamp,
+	CONSTRAINT "installations_installation_id_unique" UNIQUE("installation_id"),
+	CONSTRAINT "installations_target_login_unique" UNIQUE("target_login"),
+	CONSTRAINT "installations_target_id_unique" UNIQUE("target_id")
+);
+--> statement-breakpoint
 ALTER TABLE "account" ADD CONSTRAINT "account_user_id_user_id_fk" FOREIGN KEY ("user_id") REFERENCES "public"."user"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "session" ADD CONSTRAINT "session_user_id_user_id_fk" FOREIGN KEY ("user_id") REFERENCES "public"."user"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "installation_repositories" ADD CONSTRAINT "installation_repositories_target_id_installations_target_id_fk" FOREIGN KEY ("target_id") REFERENCES "public"."installations"("target_id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
 CREATE INDEX "account_userId_idx" ON "account" USING btree ("user_id");--> statement-breakpoint
 CREATE INDEX "session_userId_idx" ON "session" USING btree ("user_id");--> statement-breakpoint
 CREATE INDEX "verification_identifier_idx" ON "verification" USING btree ("identifier");

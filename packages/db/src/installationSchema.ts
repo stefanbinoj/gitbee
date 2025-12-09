@@ -10,8 +10,8 @@ export const installationSchema = pgTable("installations", {
   installationId: integer("installation_id").notNull().unique(),
 
   targetType: accountTypeEnum("target_type").notNull(),
-  targetLogin: text("target_login").notNull(),
-  targetId: integer("target_id").notNull(),
+  targetLogin: text("target_login").notNull().unique(),
+  targetId: integer("target_id").notNull().unique(),
 
   repositorySelection: repositorySelectionEnum("repository_selection").notNull(),
 
@@ -37,9 +37,8 @@ export const installationRelations = relations(installationSchema, ({ many }) =>
 export const installationRepositoriesSchema = pgTable("installation_repositories", {
   id: serial("id").primaryKey(),
 
-  installationId: integer("installation_id")
-    .notNull()
-    .references(() => installationSchema.installationId),
+  targetId: integer("target_id").notNull()
+    .references(() => installationSchema.targetId),
 
   repositoryId: integer("repository_id")
     .notNull()
@@ -58,7 +57,7 @@ export const installationRepositoriesSchema = pgTable("installation_repositories
 
 export const installationRepositoriesRelations = relations(installationRepositoriesSchema, ({ one }) => ({
   installation: one(installationSchema, {
-    fields: [installationRepositoriesSchema.installationId],
-    references: [installationSchema.installationId],
+    fields: [installationRepositoriesSchema.targetId],
+    references: [installationSchema.targetId],
   }),
 }));
