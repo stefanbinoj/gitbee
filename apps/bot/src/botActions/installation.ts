@@ -1,55 +1,125 @@
 import { app } from "@gitbee/octokit";
 import {
-  db, installationSchema, installationRepositoriesSchema
+  db,
+  installationSchema,
+  installationRepositoriesSchema,
 } from "@gitbee/db";
 import { eq } from "drizzle-orm";
 import { loadContributingMdFileData } from "./helper/loadContributingMdFiles";
 
 app.webhooks.on("installation", async ({ octokit, payload }) => {
-  const targetType = payload.installation.target_type as "User" | "Organization";
+  const targetType = payload.installation.target_type as
+    | "User"
+    | "Organization";
 
   const installationId = payload.installation.id;
   const targetId = payload.installation.account!.id;
   const targetLogin = (payload.installation.account as any).login as string;
 
   const repossitorySelection = payload.installation.repository_selection;
-  const repositoriesSelected = (payload.installation as any).repositories; // Has id, full_name,
-
+  const repositoriesSelected = payload.repositories || [];
 
   const sender = payload.sender?.login;
   const senderId = payload.sender?.id;
-  const senderType = payload.sender?.type as "User" | "Organization" | "Bot" | undefined;
+  const senderType = payload.sender?.type as
+    | "User"
+    | "Organization"
+    | "Bot"
+    | undefined;
 
   if (payload.action === "created") {
-    console.log(
-      "✅ New installation created for account:",
-      (payload.installation.account as any)?.login,
-    );
-    await db.insert(installationSchema).values({
-      installationId: installationId,
-      targetType: targetType,
-      targetLogin: targetLogin,
-      targetId: targetId,
-      repositorySelection: repossitorySelection,
-      senderLogin: sender,
-      senderId: senderId,
-      senderType: senderType,
+    console.log("✅ New installation created for account:", targetLogin);
+
+    // Check if installation already exists
+    const existingInstallation = await db.query.installationSchema.findFirst({
+      where: eq(installationSchema.installationId, installationId),
     });
-    // Insert all repositories in parallel
-    await Promise.all(
-      repositoriesSelected.map((repo: any) =>
-        db.insert(installationRepositoriesSchema).values({
-          installationId: installationId,
-          repositoryId: repo.id,
-          repositoryFullName: repo.full_name,
-          repositoryVisibility: repo.visibility,
+    console.log("Is this a reinstallation?", !!existingInstallation);
+
+    if (existingInstallation) {
+      // Reactivate existing installation
+      await db
+        .update(installationSchema)
+        .set({
+          isRemoved: false,
+          removedAt: null,
+          targetType: targetType,
+          targetLogin: targetLogin,
+          repositorySelection: repossitorySelection,
+          senderLogin: sender,
+          senderId: senderId,
+          senderType: senderType,
+          updatedAt: new Date(),
         })
-      )
-    );
+        .where(eq(installationSchema.installationId, installationId));
 
+      // Upsert repositories - insert or update if exists
+      await Promise.all(
+        repositoriesSelected.map((repo: any) =>
+          db
+            .insert(installationRepositoriesSchema)
+            .values({
+              installationId: installationId,
+              repositoryId: repo.id,
+              repositoryFullName: repo.full_name,
+              repositoryVisibility: repo.private ? "private" : "public",
+            })
+            .onConflictDoUpdate({
+              target: installationRepositoriesSchema.repositoryId,
+              set: {
+                isRemoved: false,
+                removedAt: null,
+                repositoryFullName: repo.full_name,
+                repositoryVisibility: repo.private ? "private" : "public",
+                installationId: installationId,
+              },
+            }),
+        ),
+      );
+    } else {
+      // Insert new installation
+      await db.insert(installationSchema).values({
+        installationId: installationId,
+        targetType: targetType,
+        targetLogin: targetLogin,
+        targetId: targetId,
+        repositorySelection: repossitorySelection,
+        senderLogin: sender,
+        senderId: senderId,
+        senderType: senderType,
+      });
 
+      // Insert all repositories in parallel
+      await Promise.all(
+        repositoriesSelected.map((repo: any) =>
+          db.insert(installationRepositoriesSchema).values({
+            installationId: installationId,
+            repositoryId: repo.id,
+            repositoryFullName: repo.full_name,
+            repositoryVisibility: repo.private ? "private" : "public",
+          }),
+        ),
+      );
+    }
 
+    for (const repo of repositoriesSelected) {
+      const [owner, repoName] = repo.full_name.split("/");
+      const contributingData = await loadContributingMdFileData(
+        octokit,
+        owner,
+        repoName,
+      );
+    }
 
+    // await Promise.all(
+    //   repositoriesSelected.map(async (repo: any) => {
+    //     const contributingData = await loadContributingMdFileData(
+    //       octokit,
+    //       repo.owner.login,
+    //       repo.name,
+    //     );
+    // )
+    // );
   } else if (payload.action === "deleted") {
     console.log("❌ Installation deleted for account:", targetLogin);
 

@@ -8,7 +8,10 @@ export async function loadContributingMdFileData(
   visitedUrls: Set<string> = new Set(),
 ) {
   if (depth >= maxDepth) {
-    console.log("DEBUG", `Maximum recursion depth reached for ${owner}/${repo}`);
+    console.log(
+      "DEBUG",
+      `Maximum recursion depth reached for ${owner}/${repo}`,
+    );
     return null;
   }
 
