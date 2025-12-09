@@ -2,20 +2,24 @@
 
 import * as React from "react"
 import Link from "next/link"
+import Image from "next/image"
 import { usePathname } from "next/navigation"
 import {
   ChevronsLeft,
   ChevronsRight,
-  Home,
-  FileText,
+  Monitor,
   Settings,
-  Book,
+  Shield,
+  Target,
+  Users,
   Brain,
   Puzzle,
   CreditCard,
   Key,
   LogOut,
   User,
+  Activity,
+  FileText
 } from "lucide-react"
 
 import { cn } from "@/lib/utils"
@@ -52,17 +56,17 @@ const NavItem = ({
           <Link
             href={href}
             className={cn(
-              "flex h-9 w-9 items-center justify-center rounded-lg transition-colors hover:bg-accent md:h-10 md:w-10",
-              active ? "bg-[#111] text-primary" : "text-muted-foreground"
+              "flex h-9 w-9 items-center justify-center rounded transition-colors hover:text-yellow-500 md:h-10 md:w-10",
+              active ? "bg-yellow-500 text-neutral-900 font-bold" : "text-neutral-400"
             )}
           >
             <Icon className="h-5 w-5" />
             <span className="sr-only">{label}</span>
           </Link>
         </TooltipTrigger>
-        <TooltipContent side="right" className="flex items-center gap-4">
+        <TooltipContent side="right" className="flex items-center gap-4 bg-neutral-900 border-neutral-700 text-yellow-500">
           {label}
-          {badge && <span className="ml-auto text-muted-foreground">{badge}</span>}
+          {badge && <span className="ml-auto text-neutral-400">{badge}</span>}
         </TooltipContent>
       </Tooltip>
     )
@@ -72,12 +76,12 @@ const NavItem = ({
     <Link
       href={href}
       className={cn(
-        "group flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors hover:bg-accent",
-        active ? "bg-[#111] text-primary" : "text-muted-foreground"
+        "group flex items-center gap-3 rounded p-3 text-sm font-medium transition-colors hover:text-yellow-500",
+        active ? "bg-yellow-500 text-neutral-900 font-bold" : "text-neutral-400"
       )}
     >
       <Icon className="h-5 w-5" />
-      <span>{label}</span>
+      <span className="whitespace-nowrap">{label.toUpperCase()}</span>
       {badge && <span className="ml-auto flex items-center gap-1">{badge}</span>}
     </Link>
   )
@@ -90,20 +94,15 @@ export function Sidebar({ className }: SidebarProps) {
   const primaryNav = [
     {
       href: "/dashboard",
-      icon: Home,
-      label: "Home",
+      icon: Monitor,
+      label: "Command Center",
       badge: (
-        <>
-          <span className="rounded-full bg-green-500/10 px-1.5 py-0.5 text-xs text-green-500">
-            +8%
-          </span>
-          <span className="text-xs text-muted-foreground">42</span>
-        </>
+        <span className="h-2 w-2 rounded-full bg-green-500 animate-pulse shadow-[0_0_8px_rgba(34,197,94,0.5)]" />
       ),
     },
     { href: "/dashboard/logs", icon: FileText, label: "Logs" },
-    { href: "/dashboard/settings", icon: Settings, label: "Settings" },
-    { href: "/dashboard/knowledgebase", icon: Book, label: "Knowledgebase" },
+    { href: "/dashboard/settings", icon: Settings, label: "Systems" },
+    { href: "/dashboard/knowledgebase", icon: Shield, label: "Intelligence" },
     { href: "/dashboard/context", icon: Brain, label: "Context" },
   ]
 
@@ -116,56 +115,39 @@ export function Sidebar({ className }: SidebarProps) {
   return (
     <div
       className={cn(
-        "flex flex-col border-r bg-card transition-[width] duration-300 ease-in-out",
-        collapsed ? "w-16" : "w-64",
+        "flex flex-col border-r border-neutral-800 bg-neutral-900 transition-[width] duration-300 ease-in-out",
+        collapsed ? "w-16" : "w-72",
         className
       )}
     >
       {/* Top Section */}
-      <div className={cn("flex items-center h-16 px-4", collapsed ? "justify-center" : "justify-between")}>
-        <div className="flex items-center gap-2 overflow-hidden">
-             {!collapsed && (
-                <div className="flex items-center gap-2">
-                     <div className="flex bg-gradient-to-br from-primary to-purple-500 w-8 h-8 rounded-full items-center justify-center shrink-0">
-                        <span className="font-bold text-white text-xs">G</span>
-                     </div>
-                     <span className="text-lg font-bold tracking-tight">GitBee</span>
-                </div>
-            )}
-             {collapsed && (
-                 <div className="flex bg-gradient-to-br from-primary to-purple-500 w-8 h-8 rounded-full items-center justify-center shrink-0">
-                    <span className="font-bold text-white text-xs">G</span>
-                 </div>
-            )}
+      <div className={cn("flex items-center h-20 px-4", collapsed ? "justify-center" : "justify-between")}>
+        <div className={cn("overflow-hidden transition-all duration-300", collapsed ? "w-0 opacity-0" : "w-32 opacity-100")}>
+            <div className="relative h-8 w-32 whitespace-nowrap">
+               <Image 
+                 src="/gitbee.png" 
+                 alt="GitBee" 
+                 fill
+                 className="object-contain object-left"
+                 priority
+               />
+            </div>
         </div>
          <Button
             variant="ghost"
             size="icon"
-            className={cn("h-6 w-6 shrink-0", collapsed ? "hidden" : "flex")}
+            className="text-neutral-400 hover:text-yellow-500 shrink-0"
             onClick={() => setCollapsed(!collapsed)}
         >
-             <ChevronsLeft className="h-4 w-4" />
+             {collapsed ? <ChevronsRight className="h-4 w-4" /> : <ChevronsLeft className="h-4 w-4" />}
         </Button>
       </div>
-      
-       {collapsed && (
-           <div className="flex justify-center pb-4">
-                <Button
-                    variant="ghost"
-                    size="icon"
-                    className="h-6 w-6"
-                    onClick={() => setCollapsed(!collapsed)}
-                >
-                    <ChevronsRight className="h-4 w-4" />
-                </Button>
-           </div>
-       )}
 
-      <Separator />
+      <Separator className="bg-neutral-800" />
 
       {/* Navigation */}
-      <div className="flex-1 overflow-auto py-4">
-        <nav className="grid gap-1 px-2">
+      <div className="flex-1 overflow-auto py-4 scrollbar-thin scrollbar-thumb-neutral-800">
+        <nav className="grid gap-1 px-4">
           {primaryNav.map((item) => (
             <NavItem
               key={item.href}
@@ -176,13 +158,13 @@ export function Sidebar({ className }: SidebarProps) {
           ))}
         </nav>
 
-        <div className="my-4 px-2">
-           <Separator className="my-2" />
+        <div className="my-4 px-4">
+           <div className="h-px bg-neutral-800" />
         </div>
         
-        <nav className="grid gap-1 px-2">
+        <nav className="grid gap-1 px-4">
           {secondaryNav.map((item) => (
-             <NavItem
+            <NavItem
               key={item.href}
               {...item}
               collapsed={collapsed}
@@ -190,24 +172,24 @@ export function Sidebar({ className }: SidebarProps) {
             />
           ))}
         </nav>
+
+
       </div>
 
-       <div className="mt-auto p-4 border-t border-border">
+       <div className="mt-auto p-4 border-t border-neutral-800">
             <div className={cn("flex items-center gap-3", collapsed ? "justify-center" : "")}>
-                <div className="h-9 w-9 rounded-full bg-muted flex items-center justify-center shrink-0">
-                     <User className="h-5 w-5 text-muted-foreground" />
+                <div className="h-9 w-9 rounded-full bg-neutral-800 flex items-center justify-center shrink-0">
+                     <User className="h-5 w-5 text-neutral-400" />
                 </div>
-                 {!collapsed && (
-                     <div className="flex-1 overflow-hidden">
-                        <p className="truncate text-sm font-medium">Stefan Binoj</p>
-                        <p className="truncate text-xs text-muted-foreground">Admin</p>
+                 <div className={cn("flex items-center gap-3 overflow-hidden transition-all duration-300", collapsed ? "w-0 opacity-0" : "flex-1 opacity-100")}>
+                     <div className="flex-1 overflow-hidden whitespace-nowrap">
+                        <p className="truncate text-sm font-medium text-neutral-200">Stefan Binoj</p>
+                        <p className="truncate text-xs text-neutral-500">Admin</p>
                      </div>
-                 )}
-                  {!collapsed && (
-                     <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-foreground">
+                      <Button variant="ghost" size="icon" className="h-8 w-8 text-neutral-400 hover:text-yellow-500 shrink-0">
                         <LogOut className="h-4 w-4" />
                      </Button>
-                  )}
+                 </div>
             </div>
        </div>
     </div>

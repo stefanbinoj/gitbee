@@ -1,9 +1,10 @@
 "use client"
 
 import { Area, AreaChart, Bar, BarChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts"
-import { ArrowUpRight, CheckCircle2, GitPullRequest } from "lucide-react"
+import { Activity, AlertTriangle, ArrowUpRight, CheckCircle2, GitPullRequest, Settings, CheckCircle } from "lucide-react"
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Button } from "@/components/ui/button"
 
 const data = [
   { name: "Mon", total: 12 },
@@ -25,6 +26,8 @@ const activityData = [
   { name: "Jul", prs: 40, issues: 30 },
 ]
 
+ 
+
 export default function DashboardPage() {
   return (
     <div className="space-y-6">
@@ -33,45 +36,55 @@ export default function DashboardPage() {
         <p className="text-muted-foreground">Overview of your repository analytics.</p>
       </div>
 
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total PRs</CardTitle>
-            <GitPullRequest className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">142</div>
-            <p className="text-xs text-muted-foreground flex items-center gap-1 mt-1">
-              <span className="text-green-500 flex items-center">+12%</span> from last month
-            </p>
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+        <Card className="bg-neutral-900 border-neutral-700">
+          <CardContent className="p-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-xs text-neutral-400 tracking-wider">SYSTEMS ONLINE</p>
+                <p className="text-2xl font-bold text-white font-mono">24/26</p>
+              </div>
+              <CheckCircle className="w-8 h-8 text-white" />
+            </div>
           </CardContent>
         </Card>
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Closed Issues</CardTitle>
-            <CheckCircle2 className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">42</div>
-            <p className="text-xs text-muted-foreground flex items-center gap-1 mt-1">
-              <span className="text-green-500 flex items-center">+8%</span> MoM
-            </p>
+
+        <Card className="bg-neutral-900 border-neutral-700">
+          <CardContent className="p-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-xs text-neutral-400 tracking-wider">WARNINGS</p>
+                <p className="text-2xl font-bold text-orange-500 font-mono">3</p>
+              </div>
+              <AlertTriangle className="w-8 h-8 text-orange-500" />
+            </div>
           </CardContent>
         </Card>
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Active Contributors</CardTitle>
-            <ArrowUpRight className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">12</div>
-            <p className="text-xs text-muted-foreground flex items-center gap-1 mt-1">
-              <span className="text-green-500 flex items-center">+2</span> new this week
-            </p>
+
+        <Card className="bg-neutral-900 border-neutral-700">
+          <CardContent className="p-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-xs text-neutral-400 tracking-wider">AVG UPTIME</p>
+                <p className="text-2xl font-bold text-white font-mono">99.7%</p>
+              </div>
+              <Activity className="w-8 h-8 text-white" />
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card className="bg-neutral-900 border-neutral-700">
+          <CardContent className="p-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-xs text-neutral-400 tracking-wider">MAINTENANCE</p>
+                <p className="text-2xl font-bold text-neutral-300 font-mono">1</p>
+              </div>
+              <Settings className="w-8 h-8 text-neutral-300" />
+            </div>
           </CardContent>
         </Card>
       </div>
-
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-7">
         <Card className="col-span-4">
           <CardHeader>
