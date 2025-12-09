@@ -7,7 +7,9 @@
     "lint": "turbo run lint",
     "format": "prettier --write \"**/*.{ts,tsx,md}\"",
     "check-types": "turbo run check-types" ,
-    "bot:dev": "cd apps/bot && bun dev"
+    "bot:dev": "cd apps/bot && bun dev",
+    "web:dev": "cd apps/web && bun dev"
+
   },
   "devDependencies": {
     "prettier": "^3.6.2",
