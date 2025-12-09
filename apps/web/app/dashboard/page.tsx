@@ -4,7 +4,7 @@ import { Area, AreaChart, Bar, BarChart, CartesianGrid, ResponsiveContainer, Too
 import { Activity, AlertTriangle, ArrowUpRight, CheckCircle2, GitPullRequest, Settings, CheckCircle } from "lucide-react"
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
+import { authClient } from "@/lib/authClient"
 
 const data = [
   { name: "Mon", total: 12 },
@@ -29,6 +29,14 @@ const activityData = [
  
 
 export default function DashboardPage() {
+   const { 
+        data: session, 
+        isPending, //loading state
+        error, //error object
+        refetch //refetch the session
+    } = authClient.useSession() 
+  console.log(session)
+
   return (
     <div className="space-y-6">
       <div>

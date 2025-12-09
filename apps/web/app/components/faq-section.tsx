@@ -9,34 +9,34 @@ interface FAQItem {
 
 const faqData: FAQItem[] = [
   {
-    question: "What is Brillance and who is it for?",
+    question: "What is GitBee and who is it for?",
     answer:
-      "Brillance is a comprehensive billing automation platform designed for businesses that need custom contract management. It's perfect for SaaS companies, service providers, and enterprises looking to streamline their billing processes.",
+      "GitBee is a moderation assistant for open source projects. It helps maintainers by monitoring issues with Slack notifications, filtering irrelevant PRs, and enforcing community conduct guidelines with automated warnings and blocks.",
   },
   {
-    question: "How does the custom contract billing work?",
+    question: "How does GitBee integrate with my GitHub repositories?",
     answer:
-      "Our platform automatically processes your custom contracts, calculates billing amounts based on your specific terms, and generates invoices. You can set up complex pricing structures, usage-based billing, and custom billing cycles.",
+      "GitBee installs as a GitHub App. Simply authorize it with your repositories and it will automatically start monitoring issues and PRs. Connect your Slack workspace to receive real-time notifications.",
   },
   {
-    question: "Can I integrate Brillance with my existing tools?",
+    question: "What exactly does GitBee do with PRs?",
     answer:
-      "Yes! Brillance integrates seamlessly with popular CRM systems, accounting software, and payment processors. We support APIs and webhooks for custom integrations with your existing workflow.",
+      "GitBee checks if PRs are relevant to your project scope. It does NOT review code quality or provide code suggestions. If a PR is spam or completely off-topic, GitBee can automatically close it with an explanation.",
   },
   {
-    question: "What kind of support do you provide?",
+    question: "How does the conduct enforcement work?",
     answer:
-      "We offer 24/7 customer support, dedicated account managers for enterprise clients, comprehensive documentation, and onboarding assistance to help you get started quickly.",
+      "GitBee monitors for unprofessional behavior and Code of Conduct violations. It issues warnings to users, and after 3 or more warnings, it can automatically block repeat offenders from your repositories.",
   },
   {
-    question: "Is my data secure with Brillance?",
+    question: "Is my repository data secure with GitBee?",
     answer:
-      "Absolutely. We use enterprise-grade security measures including end-to-end encryption, SOC 2 compliance, and regular security audits. Your data is stored in secure, redundant data centers.",
+      "Absolutely. We use enterprise-grade security with end-to-end encryption. GitBee only accesses the permissions you grant, and we never store your source code. We're SOC 2 compliant and undergo regular security audits.",
   },
   {
-    question: "How do I get started with Brillance?",
+    question: "How do I get started with GitBee?",
     answer:
-      "Getting started is simple! Sign up for our free trial, connect your existing systems, and our onboarding team will help you set up your first custom billing workflow within 24 hours.",
+      "Getting started is easy! Click 'Get started with GitHub', authorize GitBee for your repositories, connect your Slack workspace, and you're ready to go. GitBee will start monitoring immediately.",
   },
 ]
 
@@ -71,9 +71,9 @@ export default function FAQSection() {
             Frequently Asked Questions
           </div>
           <div className="w-full text-[#605A57] text-base font-normal leading-7 font-sans">
-            Explore your data, build your dashboard,
+            Everything you need to know about
             <br className="hidden md:block" />
-            bring your team together.
+            automating your OSS moderation.
           </div>
         </div>
 

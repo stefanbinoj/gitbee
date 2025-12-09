@@ -45,14 +45,14 @@ export default function PricingSection() {
 
           {/* Title */}
           <div className="self-stretch text-center flex justify-center flex-col text-[#49423D] text-3xl md:text-5xl font-semibold leading-tight md:leading-[60px] font-sans tracking-tight">
-            Choose the perfect plan for your business
+            Choose the perfect plan for your project
           </div>
 
           {/* Description */}
           <div className="self-stretch text-center text-[#605A57] text-base font-normal leading-7 font-sans">
-            Scale your operations with flexible pricing that grows with your team.
+            Scale your moderation with flexible pricing that grows with your community.
             <br />
-            Start free, upgrade when you're ready.
+            Free for open source, upgrade when you need more.
           </div>
         </div>
       </div>
@@ -128,9 +128,9 @@ export default function PricingSection() {
               {/* Plan Header */}
               <div className="self-stretch flex flex-col justify-start items-center gap-9">
                 <div className="self-stretch flex flex-col justify-start items-start gap-2">
-                  <div className="text-[rgba(55,50,47,0.90)] text-lg font-medium leading-7 font-sans">Starter</div>
+                  <div className="text-[rgba(55,50,47,0.90)] text-lg font-medium leading-7 font-sans">Open Source</div>
                   <div className="w-full max-w-[242px] text-[rgba(41,37,35,0.70)] text-sm font-normal leading-5 font-sans">
-                    Perfect for individuals and small teams getting started.
+                    Free forever for public open source projects.
                   </div>
                 </div>
 
@@ -177,11 +177,11 @@ export default function PricingSection() {
 
               <div className="self-stretch flex flex-col justify-start items-start gap-2">
                 {[
-                  "Up to 3 projects",
-                  "Basic documentation tools",
+                  "Up to 3 repositories",
+                  "Issue monitoring & Slack alerts",
+                  "Basic PR relevance filtering",
                   "Community support",
-                  "Standard templates",
-                  "Basic analytics",
+                  "Automated warning system",
                 ].map((feature, index) => (
                   <div key={index} className="self-stretch flex justify-start items-center gap-[13px]">
                     <div className="w-4 h-4 relative flex items-center justify-center">
@@ -208,9 +208,9 @@ export default function PricingSection() {
               {/* Plan Header */}
               <div className="self-stretch flex flex-col justify-start items-center gap-9">
                 <div className="self-stretch flex flex-col justify-start items-start gap-2">
-                  <div className="text-[#FBFAF9] text-lg font-medium leading-7 font-sans">Professional</div>
+                  <div className="text-[#FBFAF9] text-lg font-medium leading-7 font-sans">Pro</div>
                   <div className="w-full max-w-[242px] text-[#B2AEA9] text-sm font-normal leading-5 font-sans">
-                    Advanced features for growing teams and businesses.
+                    Advanced features for growing projects and teams.
                   </div>
                 </div>
 
@@ -258,11 +258,11 @@ export default function PricingSection() {
 
               <div className="self-stretch flex flex-col justify-start items-start gap-2">
                 {[
-                  "Unlimited projects",
-                  "Advanced documentation tools",
+                  "Unlimited repositories",
+                  "Advanced PR relevance filtering",
+                  "Custom warning thresholds",
                   "Priority support",
-                  "Custom templates",
-                  "Advanced analytics",
+                  "Multiple Slack channels",
                   "Team collaboration",
                   "API access",
                   "Custom integrations",
@@ -292,7 +292,7 @@ export default function PricingSection() {
                 <div className="self-stretch flex flex-col justify-start items-start gap-2">
                   <div className="text-[rgba(55,50,47,0.90)] text-lg font-medium leading-7 font-sans">Enterprise</div>
                   <div className="w-full max-w-[242px] text-[rgba(41,37,35,0.70)] text-sm font-normal leading-5 font-sans">
-                    Complete solution for large organizations and enterprises.
+                    Complete solution for large organizations and foundations.
                   </div>
                 </div>
 
@@ -339,14 +339,14 @@ export default function PricingSection() {
 
               <div className="self-stretch flex flex-col justify-start items-start gap-2">
                 {[
-                  "Everything in Professional",
+                  "Everything in Pro",
                   "Dedicated account manager",
-                  "24/7 phone support",
-                  "Custom onboarding",
+                  "24/7 priority support",
+                  "Custom moderation rules",
                   "Advanced security features",
                   "SSO integration",
-                  "Custom contracts",
-                  "White-label options",
+                  "SLA guarantees",
+                  "On-premise deployment",
                 ].map((feature, index) => (
                   <div key={index} className="self-stretch flex justify-start items-center gap-[13px]">
                     <div className="w-4 h-4 relative flex items-center justify-center">
