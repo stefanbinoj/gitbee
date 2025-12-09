@@ -144,19 +144,58 @@ app.webhooks.on("installation", async ({ octokit, payload }) => {
 app.webhooks.on(
   "installation_repositories.added",
   async ({ octokit, payload }) => {
-    console.log(
-      "Repositories added to installation:",
-      payload.repositories_added,
+    const targetId = payload.installation.account!.id;
+    const repositoriesAdded = payload.repositories_added || [];
+    await Promise.all(
+      repositoriesAdded.map(async (repo: any) => {
+        const existingRepository =
+          await db.query.installationRepositoriesSchema.findFirst({
+            where: eq(installationRepositoriesSchema.repositoryId, repo.id),
+          });
+
+        if (existingRepository) {
+          // Reactivate existing repository
+          await db
+            .update(installationRepositoriesSchema)
+            .set({
+              isRemoved: false,
+              removedAt: null,
+              repositoryFullName: repo.full_name,
+              repositoryVisibility: repo.private ? "private" : "public",
+              targetId: targetId,
+            })
+            .where(eq(installationRepositoriesSchema.repositoryId, repo.id));
+        } else {
+          // Insert new repository
+          await db.insert(installationRepositoriesSchema).values({
+            targetId: targetId,
+            repositoryId: repo.id,
+            repositoryFullName: repo.full_name,
+            repositoryVisibility: repo.private ? "private" : "public",
+          });
+          const [owner, repoName] = repo.full_name.split("/");
+          const contributingData = await loadContributingMdFileData(
+            octokit,
+            owner,
+            repoName,
+          );
+        }
+      }),
     );
   },
 );
 
-app.webhooks.on(
-  "installation_repositories.removed",
-  async ({ octokit, payload }) => {
-    console.log(
-      "Repositories removed from installation:",
-      payload.repositories_removed,
-    );
-  },
-);
+app.webhooks.on("installation_repositories.removed", async ({ payload }) => {
+  const repositoriesRemoved = payload.repositories_removed || [];
+  await Promise.all(
+    repositoriesRemoved.map((repo: any) =>
+      db
+        .update(installationRepositoriesSchema)
+        .set({
+          isRemoved: true,
+          removedAt: new Date(),
+        })
+        .where(eq(installationRepositoriesSchema.repositoryId, repo.id)),
+    ),
+  );
+});
