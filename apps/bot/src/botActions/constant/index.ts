@@ -1,8 +1,11 @@
-export const altPaths = [
-  "CONTRIBUTING.md",
-  "contributing.md",
-  ".github/CONTRIBUTING.md",
-  "docs/CONTRIBUTING.md",
+export type DocKey = "readme" | "contributing" | "code_of_conduct" | "security";
+export const DEFAULT_TARGETS: DocKey[] = [
+  "readme",
+  "contributing",
+  "code_of_conduct",
+  "security",
 ];
+
+export const COMMON_DIRS = ["", ".github", "docs", "guides"]; // check in this order
 
 export const maxDepth = 3;

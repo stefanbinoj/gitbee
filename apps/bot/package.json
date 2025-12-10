@@ -7,7 +7,9 @@
   },
   "dependencies": {
     "drizzle-orm": "^0.45.0",
-    "elysia": "latest"
+    "elysia": "latest",
+    "jsonwebtoken": "^9.0.3",
+    "octokit": "^5.0.5"
   },
   "devDependencies": {
     "bun-types": "latest"

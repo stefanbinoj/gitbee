@@ -1,4 +1,5 @@
 import { app } from "@gitbee/octokit";
+import { type Octokit } from "octokit";
 import {
   db,
   installationSchema,
@@ -8,6 +9,8 @@ import { eq } from "drizzle-orm";
 import { loadContributingMdFileData } from "./helper/loadContributingMdFiles";
 
 app.webhooks.on("installation", async ({ octokit, payload }) => {
+  type Repo = NonNullable<typeof payload.repositories>[number];
+
   const targetType = payload.installation.target_type as
     | "User"
     | "Organization";
@@ -21,11 +24,7 @@ app.webhooks.on("installation", async ({ octokit, payload }) => {
 
   const sender = payload.sender?.login;
   const senderId = payload.sender?.id;
-  const senderType = payload.sender?.type as
-    | "User"
-    | "Organization"
-    | "Bot"
-    | undefined;
+  const senderType = payload.sender?.type as "User" | "Organization" | "Bot";
 
   if (payload.action === "created") {
     console.log("✅ New installation created for account:", targetLogin);
@@ -56,26 +55,40 @@ app.webhooks.on("installation", async ({ octokit, payload }) => {
 
       // Upsert repositories - insert or update if exists
       await Promise.all(
-        repositoriesSelected.map((repo: any) =>
-          db
-            .insert(installationRepositoriesSchema)
-            .values({
-              targetId: targetId,
-              repositoryId: repo.id,
-              repositoryFullName: repo.full_name,
-              repositoryVisibility: repo.private ? "private" : "public",
-            })
-            .onConflictDoUpdate({
-              target: installationRepositoriesSchema.repositoryId,
-              set: {
+        repositoriesSelected.map(async (repo: Repo) => {
+          const existingRepository =
+            await db.query.installationRepositoriesSchema.findFirst({
+              where: eq(installationRepositoriesSchema.repositoryId, repo.id),
+            });
+
+          if (existingRepository) {
+            // Reactivate existing repository
+            await db
+              .update(installationRepositoriesSchema)
+              .set({
                 isRemoved: false,
                 removedAt: null,
                 repositoryFullName: repo.full_name,
                 repositoryVisibility: repo.private ? "private" : "public",
                 targetId: targetId,
-              },
-            }),
-        ),
+              })
+              .where(eq(installationRepositoriesSchema.repositoryId, repo.id));
+          } else {
+            await db.insert(installationRepositoriesSchema).values({
+              targetId: targetId,
+              repositoryId: repo.id,
+              repositoryFullName: repo.full_name,
+              repositoryVisibility: repo.private ? "private" : "public",
+            });
+            // Load contributing.md file data
+            const [owner, repoName] = repo.full_name.split("/");
+            const contributingData = await loadContributingMdFileData(
+              octokit as Octokit,
+              owner,
+              repoName
+            );
+          }
+        })
       );
     } else {
       // Insert new installation
@@ -92,35 +105,34 @@ app.webhooks.on("installation", async ({ octokit, payload }) => {
 
       // Insert all repositories in parallel
       await Promise.all(
-        repositoriesSelected.map((repo: any) =>
+        repositoriesSelected.map((repo: Repo) =>
           db.insert(installationRepositoriesSchema).values({
-            targetId: targetId,
+            targetId,
             repositoryId: repo.id,
             repositoryFullName: repo.full_name,
             repositoryVisibility: repo.private ? "private" : "public",
-          }),
-        ),
+          })
+        )
       );
-    }
+      for (const repo of repositoriesSelected) {
+        const [owner, repoName] = repo.full_name.split("/");
+        const contributingData = await loadContributingMdFileData(
+          octokit as Octokit,
+          owner,
+          repoName
+        );
+      }
 
-    for (const repo of repositoriesSelected) {
-      const [owner, repoName] = repo.full_name.split("/");
-      const contributingData = await loadContributingMdFileData(
-        octokit,
-        owner,
-        repoName,
-      );
+      // await Promise.all(
+      //   repositoriesSelected.map(async (repo: any) => {
+      //     const contributingData = await loadContributingMdFileData(
+      //       octokit,
+      //       repo.owner.login,
+      //       repo.name,
+      //     );
+      // )
+      // );
     }
-
-    // await Promise.all(
-    //   repositoriesSelected.map(async (repo: any) => {
-    //     const contributingData = await loadContributingMdFileData(
-    //       octokit,
-    //       repo.owner.login,
-    //       repo.name,
-    //     );
-    // )
-    // );
   } else if (payload.action === "deleted") {
     console.log("❌ Installation deleted for account:", targetLogin);
 
@@ -177,12 +189,12 @@ app.webhooks.on(
           const contributingData = await loadContributingMdFileData(
             octokit,
             owner,
-            repoName,
+            repoName
           );
         }
-      }),
+      })
     );
-  },
+  }
 );
 
 app.webhooks.on("installation_repositories.removed", async ({ payload }) => {
@@ -195,7 +207,7 @@ app.webhooks.on("installation_repositories.removed", async ({ payload }) => {
           isRemoved: true,
           removedAt: new Date(),
         })
-        .where(eq(installationRepositoriesSchema.repositoryId, repo.id)),
-    ),
+        .where(eq(installationRepositoriesSchema.repositoryId, repo.id))
+    )
   );
 });
