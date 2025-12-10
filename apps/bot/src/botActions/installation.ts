@@ -8,6 +8,7 @@ import {
 } from "@gitbee/db";
 import { eq } from "drizzle-orm";
 import { loadContributingMdFileData } from "./helper/loadContributingMdFiles";
+import { chunkAndIngestData } from "./helper/ingestMdFiles";
 
 app.webhooks.on("installation", async ({ octokit, payload }) => {
   type Repo = NonNullable<typeof payload.repositories>[number];
@@ -100,14 +101,22 @@ app.webhooks.on("installation", async ({ octokit, payload }) => {
                 owner,
                 repoName,
               );
-              await db
-                .update(reportSchema)
-                .set({
-                  status: "completed",
-                  updatedAt: new Date(),
-                })
-                .where(eq(reportSchema.id, insertedReport[0].id));
-              console.log(`✅ Ingestion completed for repo: ${repo.full_name}`);
+              if (contributingData) {
+                await chunkAndIngestData(contributingData, {
+                  ownner: owner,
+                  repo: repoName,
+                });
+                await db
+                  .update(reportSchema)
+                  .set({
+                    status: "completed",
+                    updatedAt: new Date(),
+                  })
+                  .where(eq(reportSchema.id, insertedReport[0].id));
+                console.log(
+                  `✅ Ingestion completed for repo: ${repo.full_name}`,
+                );
+              }
             } catch (error) {
               await db
                 .update(reportSchema)
@@ -168,14 +177,21 @@ app.webhooks.on("installation", async ({ octokit, payload }) => {
             owner,
             repoName,
           );
-          await db
-            .update(reportSchema)
-            .set({
-              status: "completed",
-              updatedAt: new Date(),
-            })
-            .where(eq(reportSchema.id, insertedReport[0].id));
-          console.log(`✅ Ingestion completed for repo: ${repo.full_name}`);
+
+          if (contributingData) {
+            await chunkAndIngestData(contributingData, {
+              ownner: owner,
+              repo: repoName,
+            });
+            await db
+              .update(reportSchema)
+              .set({
+                status: "completed",
+                updatedAt: new Date(),
+              })
+              .where(eq(reportSchema.id, insertedReport[0].id));
+            console.log(`✅ Ingestion completed for repo: ${repo.full_name}`);
+          }
         } catch (error) {
           await db
             .update(reportSchema)
@@ -271,14 +287,20 @@ app.webhooks.on(
               owner,
               repoName,
             );
-            await db
-              .update(reportSchema)
-              .set({
-                status: "completed",
-                updatedAt: new Date(),
-              })
-              .where(eq(reportSchema.id, insertedReport[0].id));
-            console.log(`✅ Ingestion completed for repo: ${repo.full_name}`);
+            if (contributingData) {
+              await chunkAndIngestData(contributingData, {
+                ownner: owner,
+                repo: repoName,
+              });
+              await db
+                .update(reportSchema)
+                .set({
+                  status: "completed",
+                  updatedAt: new Date(),
+                })
+                .where(eq(reportSchema.id, insertedReport[0].id));
+              console.log(`✅ Ingestion completed for repo: ${repo.full_name}`);
+            }
           } catch (error) {
             await db
               .update(reportSchema)
