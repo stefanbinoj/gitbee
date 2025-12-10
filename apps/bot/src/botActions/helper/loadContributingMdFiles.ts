@@ -1,5 +1,5 @@
 import { type Octokit } from "octokit";
-import { maxDepth } from "../constant";
+import { maxDepth } from "@/botActions/constant";
 import { fetchRepoDocumentationWithOctokit } from "./githubDocsFetcher";
 
 // Helper function to resolve relative URLs to raw GitHub URLs
@@ -7,7 +7,7 @@ function resolveGitHubUrl(
   url: string,
   owner: string,
   repo: string,
-  defaultBranch: string
+  defaultBranch: string,
 ): string | null {
   if (url.startsWith("http")) {
     if (
@@ -31,7 +31,7 @@ function resolveGitHubUrl(
 
 // Helper function to extract markdown links from content
 function extractMarkdownLinks(
-  content: string
+  content: string,
 ): Array<{ text: string; url: string }> {
   // Matches [text](url)
   const linkRegex = /\[([^\]]+)\]\(([^)]+)\)/g;
@@ -72,12 +72,12 @@ async function fetchUrlContent(url: string): Promise<string | null> {
 export async function loadContributingMdFileData(
   octokit: Octokit,
   owner: string,
-  repo: string
+  repo: string,
 ): Promise<string | null> {
   // Fetch default branch to handle relative links correctly
   const { data: repository } = await octokit.request(
     "GET /repos/{owner}/{repo}",
-    { owner, repo }
+    { owner, repo },
   );
   const defaultBranch = repository.default_branch;
 
@@ -98,7 +98,7 @@ export async function loadContributingMdFileData(
       contributingData,
       owner,
       repo,
-      defaultBranch
+      defaultBranch,
     );
     aggregatedContent += "# Contributing Data: \n";
     aggregatedContent += contributingDataAggregated;
@@ -109,7 +109,7 @@ export async function loadContributingMdFileData(
       readmeData,
       owner,
       repo,
-      defaultBranch
+      defaultBranch,
     );
     aggregatedContent += "# Readme Data: \n";
     aggregatedContent += readmeDataAggregated;
@@ -120,7 +120,7 @@ export async function loadContributingMdFileData(
       codeOfConductData,
       owner,
       repo,
-      defaultBranch
+      defaultBranch,
     );
     aggregatedContent += "# Code of Conduct Data: \n";
     aggregatedContent += codeOfConductDataAggregated;
@@ -131,7 +131,7 @@ export async function loadContributingMdFileData(
       securityData,
       owner,
       repo,
-      defaultBranch
+      defaultBranch,
     );
     aggregatedContent += "# Security Data: \n";
     aggregatedContent += securityDataAggregated;
@@ -147,7 +147,7 @@ const recursiveFetchContributingMd = async (
   repo: string,
   defaultBranch: string,
   depth: number = 0,
-  visitedUrls: Set<string> = new Set()
+  visitedUrls: Set<string> = new Set(),
 ): Promise<string> => {
   if (depth >= maxDepth) {
     console.log("❌❌ MAX DEPTH reached, stopping recursion");
@@ -162,7 +162,7 @@ const recursiveFetchContributingMd = async (
     const links = extractMarkdownLinks(mainContent);
     console.log(
       `ℹ️ Links found for : ${mainContent.trim().substring(0, 30)}... is::`,
-      links.map((l) => l.url)
+      links.map((l) => l.url),
     );
 
     for (const link of links) {
@@ -170,7 +170,7 @@ const recursiveFetchContributingMd = async (
         link.url,
         owner,
         repo,
-        defaultBranch
+        defaultBranch,
       );
       if (!resolvedUrl || visitedUrls.has(resolvedUrl)) {
         console.log(`😢 This is not a github url: ${link.url}`);
@@ -188,12 +188,12 @@ const recursiveFetchContributingMd = async (
           repo,
           defaultBranch,
           depth + 1,
-          visitedUrls
+          visitedUrls,
         );
 
         aggregatedContent += `\n\n--- Content from ${link.text} (${link.url}) ---\n${processedLinkedContent}`;
         console.log(
-          `✅✅ Successfully aggregated content from ${resolvedUrl}, ${linkedContent}`
+          `✅✅ Successfully aggregated content from ${resolvedUrl}, ${linkedContent}`,
         );
       }
     }
@@ -209,14 +209,14 @@ async function processLinkedContent(
   repo: string,
   defaultBranch: string,
   depth: number,
-  visitedUrls: Set<string>
+  visitedUrls: Set<string>,
 ): Promise<string> {
   if (depth >= maxDepth) return content;
 
   const links = extractMarkdownLinks(content);
   console.log(
     `ℹ️ Links found for recursive : ${content.trim().substring(0, 30)}... is::`,
-    links.map((l) => l.url)
+    links.map((l) => l.url),
   );
   let processedContent = content;
 
@@ -235,7 +235,7 @@ async function processLinkedContent(
         repo,
         defaultBranch,
         depth + 1,
-        visitedUrls
+        visitedUrls,
       );
       processedContent += `\n\n--- Content from ${link.text} (${link.url}) ---\n${nestedContent}`;
     }

@@ -99,7 +99,7 @@ app.webhooks.on("installation", async ({ octokit, payload }) => {
               const contributingData = await loadContributingMdFileData(
                 octokit as Octokit,
                 owner,
-                repoName,
+                repoName
               );
               if (contributingData) {
                 await chunkAndIngestData(contributingData, {
@@ -114,7 +114,7 @@ app.webhooks.on("installation", async ({ octokit, payload }) => {
                   })
                   .where(eq(reportSchema.id, insertedReport[0].id));
                 console.log(
-                  `✅ Ingestion completed for repo: ${repo.full_name}`,
+                  `✅ Ingestion completed for repo: ${repo.full_name}`
                 );
               }
             } catch (error) {
@@ -127,11 +127,11 @@ app.webhooks.on("installation", async ({ octokit, payload }) => {
                 .where(eq(reportSchema.id, insertedReport[0].id));
               console.error(
                 `❌ Ingestion failed for repo: ${repo.full_name}`,
-                error,
+                error
               );
             }
           }
-        }),
+        })
       );
     } else {
       // Insert new installation
@@ -154,8 +154,8 @@ app.webhooks.on("installation", async ({ octokit, payload }) => {
             repositoryId: repo.id,
             repositoryFullName: repo.full_name,
             repositoryVisibility: repo.private ? "private" : "public",
-          }),
-        ),
+          })
+        )
       );
       for (const repo of repositoriesSelected) {
         const [owner, repoName] = repo.full_name.split("/");
@@ -175,7 +175,7 @@ app.webhooks.on("installation", async ({ octokit, payload }) => {
           const contributingData = await loadContributingMdFileData(
             octokit as Octokit,
             owner,
-            repoName,
+            repoName
           );
 
           if (contributingData) {
@@ -202,7 +202,7 @@ app.webhooks.on("installation", async ({ octokit, payload }) => {
             .where(eq(reportSchema.id, insertedReport[0].id));
           console.error(
             `❌ Ingestion failed for repo: ${repo.full_name}`,
-            error,
+            error
           );
         }
       }
@@ -251,6 +251,7 @@ app.webhooks.on(
 
         if (existingRepository) {
           // Reactivate existing repository
+          console.log("Exitsting repostiry added: ", repo.full_name);
           await db
             .update(installationRepositoriesSchema)
             .set({
@@ -263,6 +264,7 @@ app.webhooks.on(
             .where(eq(installationRepositoriesSchema.repositoryId, repo.id));
         } else {
           // Insert new repository
+          console.log("New repostiry added: ", repo.full_name);
           await db.insert(installationRepositoriesSchema).values({
             targetId: targetId,
             repositoryId: repo.id,
@@ -285,7 +287,7 @@ app.webhooks.on(
             const contributingData = await loadContributingMdFileData(
               octokit as Octokit,
               owner,
-              repoName,
+              repoName
             );
             if (contributingData) {
               await chunkAndIngestData(contributingData, {
@@ -311,13 +313,13 @@ app.webhooks.on(
               .where(eq(reportSchema.id, insertedReport[0].id));
             console.error(
               `❌ Ingestion failed for repo: ${repo.full_name}`,
-              error,
+              error
             );
           }
         }
-      }),
+      })
     );
-  },
+  }
 );
 
 app.webhooks.on("installation_repositories.removed", async ({ payload }) => {
@@ -330,8 +332,8 @@ app.webhooks.on("installation_repositories.removed", async ({ payload }) => {
           isRemoved: true,
           removedAt: new Date(),
         })
-        .where(eq(installationRepositoriesSchema.repositoryId, repo.id)),
-    ),
+        .where(eq(installationRepositoriesSchema.repositoryId, repo.id))
+    )
   );
   console.log("❌ Repository removed:", repositoriesRemoved);
 });

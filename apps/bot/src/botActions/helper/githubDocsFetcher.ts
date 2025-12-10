@@ -1,5 +1,5 @@
 import { type Octokit } from "octokit";
-import { COMMON_DIRS, DEFAULT_TARGETS, DocKey } from "../constant/index";
+import { COMMON_DIRS, DEFAULT_TARGETS, DocKey } from "@/botActions/constant";
 
 type DocResult = {
   path: string | null;
@@ -84,12 +84,12 @@ export async function fetchRepoDocumentationWithOctokit({
           owner: owner,
           repo: repo,
           path: dir === "" ? "" : dir,
-        }
+        },
       );
 
       console.log(
         `\nℹ️ The content length got for #${dir}# is:`,
-        res.data.length
+        res.data.length,
       );
 
       if (!Array.isArray(res.data)) {
@@ -114,7 +114,7 @@ export async function fetchRepoDocumentationWithOctokit({
       // ignore 404 (directory doesn't exist) and continue
       if (err?.status === 404) {
         console.log(
-          `Directory ${dir} not found in ${owner}/${repo}, continuing.`
+          `Directory ${dir} not found in ${owner}/${repo}, continuing.`,
         );
         continue;
       }
@@ -142,13 +142,13 @@ export async function fetchRepoDocumentationWithOctokit({
             owner: owner,
             repo: repo,
             path: entry.path,
-          }
+          },
         );
 
         if (fileRes.data.content) {
           const fileContent = Buffer.from(
             fileRes.data.content,
-            "base64"
+            "base64",
           ).toString("utf-8");
           entry.content = fileContent;
         } else {
@@ -159,7 +159,7 @@ export async function fetchRepoDocumentationWithOctokit({
         // if a file was deleted between tree and fetch, or 404, set null
         console.log(
           `Failed to fetch content for ${entry.path} in ${owner}/${repo}:`,
-          err.message
+          err.message,
         );
         entry.content = null;
       }

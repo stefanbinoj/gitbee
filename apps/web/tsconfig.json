@@ -18,8 +18,10 @@
         "name": "next"
       }
     ],
+    "baseUrl": ".",
     "paths": {
       "@/*": ["./app/*"],
+      "@root/*": ["./*"],
       "@gitbee/db": ["../../packages/db/src"],
       "@gitbee/ai": ["../../packages/ai/src"],
       "@gitbee/octokit": ["../../packages/octokit/src"],

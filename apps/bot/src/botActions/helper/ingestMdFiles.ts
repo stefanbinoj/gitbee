@@ -4,7 +4,7 @@ import {
   MAX_CHUNK_TOKENS,
   CHUNK_OVERLAP_TOKENS,
   MIN_SECTION_TOKENS,
-} from "../constant";
+} from "@/botActions/constant";
 import { get_encoding } from "tiktoken";
 
 // Initialize tokenizer (cl100k_base is used by text-embedding-3-small)
@@ -42,7 +42,7 @@ function decodeTokens(tokens: Uint32Array): string {
 function generateChunkId(
   owner: string,
   repo: string,
-  chunkIndex: number
+  chunkIndex: number,
 ): string {
   return `${owner}/${repo}/chunk-${chunkIndex}-${Date.now()}`;
 }
@@ -67,7 +67,7 @@ function parseDocType(header: string): string {
 
 function splitByDocumentType(aggregatedContent: string): DocumentSection[] {
   console.log(
-    "[splitByDocumentType] Splitting content by document type separator..."
+    "[splitByDocumentType] Splitting content by document type separator...",
   );
 
   const sections = aggregatedContent.split("------").filter((s) => s.trim());
@@ -92,24 +92,24 @@ function splitByDocumentType(aggregatedContent: string): DocumentSection[] {
       if (content) {
         documentSections.push({ docType, content });
         console.log(
-          `[splitByDocumentType] Found '${docType}' section (${content.length} chars, ${countTokens(content)} tokens)`
+          `[splitByDocumentType] Found '${docType}' section (${content.length} chars, ${countTokens(content)} tokens)`,
         );
       } else {
         console.log(
-          `[splitByDocumentType] Found '${docType}' header but no content, skipping`
+          `[splitByDocumentType] Found '${docType}' header but no content, skipping`,
         );
       }
     } else {
       // If no header found, treat as unknown type
       console.log(
-        `[splitByDocumentType] Section without recognized header, skipping (${trimmedSection.substring(0, 50)}...)`
+        `[splitByDocumentType] Section without recognized header, skipping (${trimmedSection.substring(0, 50)}...)`,
       );
     }
   }
 
   const docTypes = documentSections.map((s) => s.docType);
   console.log(
-    `[splitByDocumentType] Split into ${documentSections.length} document sections: [${docTypes.join(", ")}]`
+    `[splitByDocumentType] Split into ${documentSections.length} document sections: [${docTypes.join(", ")}]`,
   );
 
   return documentSections;
@@ -117,7 +117,7 @@ function splitByDocumentType(aggregatedContent: string): DocumentSection[] {
 //tuffest
 function parseMarkdownSections(
   content: string,
-  docType: string
+  docType: string,
 ): MarkdownSection[] {
   console.log(`[parseMarkdownSections] Parsing markdown for '${docType}'...`);
 
@@ -194,27 +194,28 @@ function parseMarkdownSections(
 
   // Filter out sections with too few tokens
   const validSections = sections.filter(
-    (s) => s.tokenCount >= MIN_SECTION_TOKENS
+    (s) => s.tokenCount >= MIN_SECTION_TOKENS,
   );
   const skippedCount = sections.length - validSections.length;
 
   if (skippedCount > 0) {
     console.log(
-      `[parseMarkdownSections] Skipped ${skippedCount} sections with < ${MIN_SECTION_TOKENS} tokens`
+      `[parseMarkdownSections] Skipped ${skippedCount} sections with < ${MIN_SECTION_TOKENS} tokens`,
     );
   }
 
   console.log(
-    `[parseMarkdownSections] Parsed ${validSections.length} valid sections for '${docType}'`
+    `[parseMarkdownSections] Parsed ${validSections.length} valid sections for '${docType}'`,
   );
 
   return validSections;
 }
 
+// Helper
 function findSentenceBoundary(
   text: string,
   searchStart: number,
-  searchEnd: number
+  searchEnd: number,
 ): number {
   const searchRegion = text.slice(searchStart, searchEnd);
 
@@ -250,7 +251,7 @@ function findSentenceBoundary(
 function splitTextByTokens(
   text: string,
   maxTokens: number,
-  overlapTokens: number
+  overlapTokens: number,
 ): string[] {
   const totalTokens = countTokens(text);
 
@@ -259,7 +260,7 @@ function splitTextByTokens(
   }
 
   console.log(
-    `[splitTextByTokens] Splitting text of ${totalTokens} tokens (max: ${maxTokens}, overlap: ${overlapTokens})`
+    `[splitTextByTokens] Splitting text of ${totalTokens} tokens (max: ${maxTokens}, overlap: ${overlapTokens})`,
   );
 
   const tokens = tokenizer.encode(text);
@@ -279,7 +280,7 @@ function splitTextByTokens(
       const boundaryIndex = findSentenceBoundary(
         chunkText,
         searchStart,
-        chunkText.length
+        chunkText.length,
       );
 
       if (boundaryIndex !== -1 && boundaryIndex > searchStart) {
@@ -303,7 +304,7 @@ function splitTextByTokens(
 
 function createChunksFromSections(sections: MarkdownSection[]): Chunk[] {
   console.log(
-    `[createChunksFromSections] Processing ${sections.length} sections...`
+    `[createChunksFromSections] Processing ${sections.length} sections...`,
   );
 
   const chunks: Chunk[] = [];
@@ -322,13 +323,13 @@ function createChunksFromSections(sections: MarkdownSection[]): Chunk[] {
     } else {
       // Section needs to be split
       console.log(
-        `[createChunksFromSections] Section "${section.headerPath}" has ${section.tokenCount} tokens, splitting...`
+        `[createChunksFromSections] Section "${section.headerPath}" has ${section.tokenCount} tokens, splitting...`,
       );
 
       const textChunks = splitTextByTokens(
         section.content,
         MAX_CHUNK_TOKENS,
-        CHUNK_OVERLAP_TOKENS
+        CHUNK_OVERLAP_TOKENS,
       );
 
       for (let i = 0; i < textChunks.length; i++) {
@@ -345,14 +346,14 @@ function createChunksFromSections(sections: MarkdownSection[]): Chunk[] {
   }
 
   console.log(
-    `[createChunksFromSections] Created ${chunks.length} total chunks`
+    `[createChunksFromSections] Created ${chunks.length} total chunks`,
   );
   return chunks;
 }
 
 export async function chunkAndIngestData(
   data: string,
-  opts: { ownner: string; repo: string }
+  opts: { ownner: string; repo: string },
 ): Promise<string> {
   const { ownner: owner, repo } = opts; // Note: typo in 'ownner' is kept for compatibility
 
@@ -366,17 +367,14 @@ export async function chunkAndIngestData(
 
   if (hasExistingChunks) {
     console.log(
-      `[chunkAndIngestData] Repo ${owner}/${repo} already has chunks. Skipping ingestion.`
+      `[chunkAndIngestData] Repo ${owner}/${repo} already has chunks. Skipping ingestion.`,
     );
     console.log(`${"=".repeat(70)}\n`);
     return "skipped - already ingested";
   }
 
   console.log(
-    `[chunkAndIngestData] No existing chunks found. Proceeding with ingestion.`
-  );
-  console.log(
-    `[chunkAndIngestData] Input data length: ${data.length} characters`
+    `[chunkAndIngestData] No existing chunks found. Proceeding with ingestion. with length: ${data.length}`,
   );
 
   // Step 1: Split by document type (------)
@@ -402,12 +400,12 @@ export async function chunkAndIngestData(
     // Parse markdown sections for this document
     const markdownSections = parseMarkdownSections(
       docSection.content,
-      docSection.docType
+      docSection.docType,
     );
 
     if (markdownSections.length === 0) {
       console.log(
-        `  [chunkAndIngestData] No valid sections in '${docSection.docType}', skipping.`
+        `  [chunkAndIngestData] No valid sections in '${docSection.docType}', skipping.`,
       );
       continue;
     }
@@ -419,7 +417,7 @@ export async function chunkAndIngestData(
     for (const section of markdownSections) {
       totalTokens += section.tokenCount;
       console.log(
-        `    - "${section.headerPath}" (${section.tokenCount} tokens)`
+        `    - "${section.headerPath}" (${section.tokenCount} tokens)`,
       );
     }
 
@@ -436,7 +434,7 @@ export async function chunkAndIngestData(
 
   // Step 3: Generate embeddings for all chunks
   console.log(
-    `\n[Step 3] Generating embeddings for ${allChunks.length} chunks...`
+    `\n[Step 3] Generating embeddings for ${allChunks.length} chunks...`,
   );
   const texts = allChunks.map((c) => c.text);
 
@@ -444,7 +442,7 @@ export async function chunkAndIngestData(
   try {
     embeddings = await embedTexts(texts);
     console.log(
-      `[chunkAndIngestData] Successfully generated ${embeddings.length} embeddings`
+      `[chunkAndIngestData] Successfully generated ${embeddings.length} embeddings`,
     );
   } catch (error) {
     console.error(`[chunkAndIngestData] Error generating embeddings:`, error);
@@ -466,7 +464,7 @@ export async function chunkAndIngestData(
 
   // Step 5: Insert into LanceDB
   console.log(
-    `\n[Step 5] Inserting ${chunkData.length} chunks into LanceDB...`
+    `\n[Step 5] Inserting ${chunkData.length} chunks into LanceDB...`,
   );
   try {
     await insertChunks(chunkData);
@@ -481,7 +479,7 @@ export async function chunkAndIngestData(
   console.log(`[chunkAndIngestData] Ingestion complete for ${owner}/${repo}`);
   console.log(`[chunkAndIngestData] Summary:`);
   console.log(
-    `  - Document types processed: ${processedDocTypes.length} [${processedDocTypes.join(", ")}]`
+    `  - Document types processed: ${processedDocTypes.length} [${processedDocTypes.join(", ")}]`,
   );
   console.log(`  - Total sections parsed: ${totalSections}`);
   console.log(`  - Total chunks created: ${allChunks.length}`);
