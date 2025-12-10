@@ -15,6 +15,7 @@ function resolveGitHubUrl(
       url.includes(owner) &&
       url.includes(repo)
     ) {
+      console.log(`This is a github url: ${url}`);
       return url
         .replace("github.com", "raw.githubusercontent.com")
         .replace("/blob/", "/")
@@ -34,6 +35,8 @@ function extractMarkdownLinks(
 ): Array<{ text: string; url: string }> {
   // Matches [text](url)
   const linkRegex = /\[([^\]]+)\]\(([^)]+)\)/g;
+
+  //const linkRegex = /(?:https?:\/\/)?(?:[a-zA-Z0-9-]+\.)+[a-zA-Z]{2,}(?:[^\s"'<>]*)?/g;
   const links: Array<{ text: string; url: string }> = [];
   let match;
 
@@ -43,8 +46,8 @@ function extractMarkdownLinks(
       continue;
     }
     links.push({
-      text: match[1] || "",
-      url: match[2] || "",
+      text: match[1] || "xxxx",
+      url: match[2] || "yyyy",
     });
   }
 
@@ -97,9 +100,9 @@ export async function loadContributingMdFileData(
       repo,
       defaultBranch
     );
-    aggregatedContent += "Contributing Data: \n\n";
+    aggregatedContent += "# Contributing Data: \n";
     aggregatedContent += contributingDataAggregated;
-    aggregatedContent += "\n\n------\n\n";
+    aggregatedContent += "\n------\n";
   }
   if (readmeData) {
     const readmeDataAggregated = await recursiveFetchContributingMd(
@@ -108,9 +111,9 @@ export async function loadContributingMdFileData(
       repo,
       defaultBranch
     );
-    aggregatedContent += "Readme Data: \n\n";
+    aggregatedContent += "# Readme Data: \n";
     aggregatedContent += readmeDataAggregated;
-    aggregatedContent += "\n\n------\n\n";
+    aggregatedContent += "\n------\n";
   }
   if (codeOfConductData) {
     const codeOfConductDataAggregated = await recursiveFetchContributingMd(
@@ -119,9 +122,9 @@ export async function loadContributingMdFileData(
       repo,
       defaultBranch
     );
-    aggregatedContent += "Code of Conduct Data: \n\n";
+    aggregatedContent += "# Code of Conduct Data: \n";
     aggregatedContent += codeOfConductDataAggregated;
-    aggregatedContent += "\n\n------\n\n";
+    aggregatedContent += "\n------\n";
   }
   if (securityData) {
     const securityDataAggregated = await recursiveFetchContributingMd(
@@ -130,9 +133,9 @@ export async function loadContributingMdFileData(
       repo,
       defaultBranch
     );
-    aggregatedContent += "Security Data: \n\n";
+    aggregatedContent += "# Security Data: \n";
     aggregatedContent += securityDataAggregated;
-    aggregatedContent += "\n\n------\n\n";
+    aggregatedContent += "\n------\n";
   }
 
   return aggregatedContent;
@@ -147,19 +150,20 @@ const recursiveFetchContributingMd = async (
   visitedUrls: Set<string> = new Set()
 ): Promise<string> => {
   if (depth >= maxDepth) {
-    console.log("MAX DEPTH reached, stopping recursion");
+    console.log("❌❌ MAX DEPTH reached, stopping recursion");
     return mainContent;
   }
 
-  let aggregatedContent = "Main Content: \n\n";
+  let aggregatedContent = "Main Content: \n";
   aggregatedContent += mainContent;
 
   // Implementation of recursive fetching logic
   if (depth < maxDepth - 1) {
     const links = extractMarkdownLinks(mainContent);
-    console.log("Links found : ", {
-      links: links.map((l) => l.url),
-    });
+    console.log(
+      `ℹ️ Links found for : ${mainContent.trim().substring(0, 30)}... is::`,
+      links.map((l) => l.url)
+    );
 
     for (const link of links) {
       const resolvedUrl = resolveGitHubUrl(
@@ -169,11 +173,12 @@ const recursiveFetchContributingMd = async (
         defaultBranch
       );
       if (!resolvedUrl || visitedUrls.has(resolvedUrl)) {
+        console.log(`😢 This is not a github url: ${link.url}`);
         continue;
       }
 
       visitedUrls.add(resolvedUrl);
-      console.log("DEBUG", `Following link: ${link.text} -> ${resolvedUrl}`);
+      console.log(`😊Following link: ${link.text} -> ${resolvedUrl}`);
 
       const linkedContent = await fetchUrlContent(resolvedUrl);
       if (linkedContent) {
@@ -188,18 +193,12 @@ const recursiveFetchContributingMd = async (
 
         aggregatedContent += `\n\n--- Content from ${link.text} (${link.url}) ---\n${processedLinkedContent}`;
         console.log(
-          "INFO",
-          `Successfully aggregated content from ${resolvedUrl}`
+          `✅✅ Successfully aggregated content from ${resolvedUrl}, ${linkedContent}`
         );
       }
     }
   }
 
-  console.log(
-    "INFO",
-    `Aggregated content for ${owner}/${repo}:\n`,
-    aggregatedContent
-  );
   return aggregatedContent;
 };
 
@@ -215,6 +214,10 @@ async function processLinkedContent(
   if (depth >= maxDepth) return content;
 
   const links = extractMarkdownLinks(content);
+  console.log(
+    `ℹ️ Links found for recursive : ${content.trim().substring(0, 30)}... is::`,
+    links.map((l) => l.url)
+  );
   let processedContent = content;
 
   for (const link of links) {

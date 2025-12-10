@@ -210,4 +210,5 @@ app.webhooks.on("installation_repositories.removed", async ({ payload }) => {
         .where(eq(installationRepositoriesSchema.repositoryId, repo.id))
     )
   );
+  console.log("❌ Repository removed:", repositoriesRemoved);
 });

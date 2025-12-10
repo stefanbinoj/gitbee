@@ -87,11 +87,14 @@ export async function fetchRepoDocumentationWithOctokit({
         }
       );
 
-      console.log(`The content got for ${dir} is:\n`, res);
+      console.log(
+        `\nℹ️ The content length got for #${dir}# is:`,
+        res.data.length
+      );
 
       if (!Array.isArray(res.data)) {
         // path is a file (rare when dir is ""), skip
-        console.log(`Path ${dir} in ${owner}/${repo} is a file, skipping.`);
+        console.log(`⚠️ Path ${dir} in ${owner}/${repo} is a file, skipping.`);
         continue;
       }
 
@@ -126,6 +129,7 @@ export async function fetchRepoDocumentationWithOctokit({
   for (const t of DEFAULT_TARGETS) {
     const entry = results[t];
     if (!entry.path) {
+      console.log(`Path ${t} in ${owner}/${repo} is null, skipping.`);
       entry.content = null;
       continue;
     }
@@ -141,20 +145,11 @@ export async function fetchRepoDocumentationWithOctokit({
           }
         );
 
-        console.log(
-          `Fetching ${entry.path} from ${owner}/${repo} res: `,
-          fileRes
-        );
-
         if (fileRes.data.content) {
           const fileContent = Buffer.from(
             fileRes.data.content,
             "base64"
           ).toString("utf-8");
-          console.log(
-            `Decoded content for ${entry.path} in ${owner}/${repo}:\n`,
-            fileContent
-          );
           entry.content = fileContent;
         } else {
           console.log(`No content found for ${entry.path} in ${owner}/${repo}`);
