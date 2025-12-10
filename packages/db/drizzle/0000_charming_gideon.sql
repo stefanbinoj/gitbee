@@ -1,6 +1,9 @@
-CREATE TYPE "account_type" AS ENUM ('User', 'Organization', 'Bot');--> statement-breakpoint
-CREATE TYPE "repository_selection" AS ENUM ('all', 'selected');--> statement-breakpoint
-CREATE TYPE "repository_visibility" AS ENUM ('private', 'public');--> statement-breakpoint
+CREATE TYPE "account_type" AS ENUM('User', 'Organization', 'Bot');
+CREATE TYPE "repository_selection" AS ENUM('all', 'selected');
+CREATE TYPE "repository_visibility" AS ENUM('private', 'public');
+CREATE TYPE "report_type" AS ENUM('ingestion', 'comment_analysis', 'pr_analysis');
+CREATE TYPE "report_status" AS ENUM('in_progress', 'completed', 'failed');
+--> statement-breakpoint
 CREATE TABLE "account" (
 	"id" text PRIMARY KEY NOT NULL,
 	"account_id" text NOT NULL,
@@ -80,9 +83,22 @@ CREATE TABLE "installations" (
 	CONSTRAINT "installations_target_id_unique" UNIQUE("target_id")
 );
 --> statement-breakpoint
+CREATE TABLE "reports" (
+	"id" serial PRIMARY KEY NOT NULL,
+	"installation_id" integer NOT NULL,
+	"repository_id" integer NOT NULL,
+	"target_id" integer NOT NULL,
+	"report_type" "report_type" NOT NULL,
+	"status" "report_status" DEFAULT 'in_progress' NOT NULL,
+	"created_at" timestamp DEFAULT now() NOT NULL,
+	"updated_at" timestamp DEFAULT now() NOT NULL,
+	"completed_at" timestamp
+);
+--> statement-breakpoint
 ALTER TABLE "account" ADD CONSTRAINT "account_user_id_user_id_fk" FOREIGN KEY ("user_id") REFERENCES "public"."user"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "session" ADD CONSTRAINT "session_user_id_user_id_fk" FOREIGN KEY ("user_id") REFERENCES "public"."user"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "installation_repositories" ADD CONSTRAINT "installation_repositories_target_id_installations_target_id_fk" FOREIGN KEY ("target_id") REFERENCES "public"."installations"("target_id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "reports" ADD CONSTRAINT "reports_installation_id_installations_installation_id_fk" FOREIGN KEY ("installation_id") REFERENCES "public"."installations"("installation_id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
 CREATE INDEX "account_userId_idx" ON "account" USING btree ("user_id");--> statement-breakpoint
 CREATE INDEX "session_userId_idx" ON "session" USING btree ("user_id");--> statement-breakpoint
 CREATE INDEX "verification_identifier_idx" ON "verification" USING btree ("identifier");

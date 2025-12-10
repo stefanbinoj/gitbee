@@ -4,6 +4,7 @@ import {
   db,
   installationSchema,
   installationRepositoriesSchema,
+  reportSchema,
 } from "@gitbee/db";
 import { eq } from "drizzle-orm";
 import { loadContributingMdFileData } from "./helper/loadContributingMdFiles";
@@ -82,13 +83,46 @@ app.webhooks.on("installation", async ({ octokit, payload }) => {
             });
             // Load contributing.md file data
             const [owner, repoName] = repo.full_name.split("/");
-            const contributingData = await loadContributingMdFileData(
-              octokit as Octokit,
-              owner,
-              repoName
-            );
+            const insertedReport = await db
+              .insert(reportSchema)
+              .values({
+                installationId: installationId,
+                repositoryId: repo.id,
+                targetId: targetId,
+                reportType: "ingestion",
+                status: "in_progress",
+              })
+              .returning({ id: reportSchema.id });
+
+            try {
+              const contributingData = await loadContributingMdFileData(
+                octokit as Octokit,
+                owner,
+                repoName,
+              );
+              await db
+                .update(reportSchema)
+                .set({
+                  status: "completed",
+                  updatedAt: new Date(),
+                })
+                .where(eq(reportSchema.id, insertedReport[0].id));
+              console.log(`✅ Ingestion completed for repo: ${repo.full_name}`);
+            } catch (error) {
+              await db
+                .update(reportSchema)
+                .set({
+                  status: "failed",
+                  updatedAt: new Date(),
+                })
+                .where(eq(reportSchema.id, insertedReport[0].id));
+              console.error(
+                `❌ Ingestion failed for repo: ${repo.full_name}`,
+                error,
+              );
+            }
           }
-        })
+        }),
       );
     } else {
       // Insert new installation
@@ -111,16 +145,50 @@ app.webhooks.on("installation", async ({ octokit, payload }) => {
             repositoryId: repo.id,
             repositoryFullName: repo.full_name,
             repositoryVisibility: repo.private ? "private" : "public",
-          })
-        )
+          }),
+        ),
       );
       for (const repo of repositoriesSelected) {
         const [owner, repoName] = repo.full_name.split("/");
-        const contributingData = await loadContributingMdFileData(
-          octokit as Octokit,
-          owner,
-          repoName
-        );
+        console.log(`📄 Starting ingestion for repo: ${repo.full_name}`);
+        const insertedReport = await db
+          .insert(reportSchema)
+          .values({
+            installationId: installationId,
+            repositoryId: repo.id,
+            targetId: targetId,
+            reportType: "ingestion",
+            status: "in_progress",
+          })
+          .returning({ id: reportSchema.id });
+
+        try {
+          const contributingData = await loadContributingMdFileData(
+            octokit as Octokit,
+            owner,
+            repoName,
+          );
+          await db
+            .update(reportSchema)
+            .set({
+              status: "completed",
+              updatedAt: new Date(),
+            })
+            .where(eq(reportSchema.id, insertedReport[0].id));
+          console.log(`✅ Ingestion completed for repo: ${repo.full_name}`);
+        } catch (error) {
+          await db
+            .update(reportSchema)
+            .set({
+              status: "failed",
+              updatedAt: new Date(),
+            })
+            .where(eq(reportSchema.id, insertedReport[0].id));
+          console.error(
+            `❌ Ingestion failed for repo: ${repo.full_name}`,
+            error,
+          );
+        }
       }
 
       // await Promise.all(
@@ -186,15 +254,48 @@ app.webhooks.on(
             repositoryVisibility: repo.private ? "private" : "public",
           });
           const [owner, repoName] = repo.full_name.split("/");
-          const contributingData = await loadContributingMdFileData(
-            octokit,
-            owner,
-            repoName
-          );
+          const insertedReport = await db
+            .insert(reportSchema)
+            .values({
+              installationId: payload.installation.id,
+              repositoryId: repo.id,
+              targetId: targetId,
+              reportType: "ingestion",
+              status: "in_progress",
+            })
+            .returning({ id: reportSchema.id });
+
+          try {
+            const contributingData = await loadContributingMdFileData(
+              octokit as Octokit,
+              owner,
+              repoName,
+            );
+            await db
+              .update(reportSchema)
+              .set({
+                status: "completed",
+                updatedAt: new Date(),
+              })
+              .where(eq(reportSchema.id, insertedReport[0].id));
+            console.log(`✅ Ingestion completed for repo: ${repo.full_name}`);
+          } catch (error) {
+            await db
+              .update(reportSchema)
+              .set({
+                status: "failed",
+                updatedAt: new Date(),
+              })
+              .where(eq(reportSchema.id, insertedReport[0].id));
+            console.error(
+              `❌ Ingestion failed for repo: ${repo.full_name}`,
+              error,
+            );
+          }
         }
-      })
+      }),
     );
-  }
+  },
 );
 
 app.webhooks.on("installation_repositories.removed", async ({ payload }) => {
@@ -207,8 +308,8 @@ app.webhooks.on("installation_repositories.removed", async ({ payload }) => {
           isRemoved: true,
           removedAt: new Date(),
         })
-        .where(eq(installationRepositoriesSchema.repositoryId, repo.id))
-    )
+        .where(eq(installationRepositoriesSchema.repositoryId, repo.id)),
+    ),
   );
   console.log("❌ Repository removed:", repositoriesRemoved);
 });

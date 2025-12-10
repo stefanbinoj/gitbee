@@ -1,4 +1,4 @@
-import { pgTable, text, timestamp, boolean, integer, pgEnum, serial, primaryKey } from "drizzle-orm/pg-core";
+import { pgTable, text, timestamp, boolean, integer, pgEnum, serial  } from "drizzle-orm/pg-core";
 import { relations } from "drizzle-orm";
 
 const accountTypeEnum = pgEnum("account_type", ["User", "Organization", "Bot"]);
