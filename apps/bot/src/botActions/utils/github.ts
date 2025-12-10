@@ -1,27 +1,13 @@
-import { type Octokit } from "octokit";
-import { COMMON_DIRS, DEFAULT_TARGETS, DocKey } from "@/botActions/constant";
-
-type DocResult = {
-  path: string | null;
-  content: string | null;
-};
-
-type FetchDocsOptions = {
-  owner: string;
-  repo: string;
-  octokit: Octokit;
-  concurrency?: number;
-};
+import type { Octokit } from "@gitbee/octokit";
+import type { DocKey, DocResult } from "@/botActions/types";
+import { COMMON_DIRS, DEFAULT_TARGETS } from "@/botActions/constants";
 
 function normalizeFileKey(filename: string): string {
   const base = filename.split("/").pop() ?? filename;
-  const normalized = base
+  return base
     .replace(/\.(md|markdown|txt|mdown)$/i, "")
     .replace(/\W+/g, "_")
     .toLowerCase();
-
-  console.log(`Normalized filename ${filename} to key ${normalized}`);
-  return normalized;
 }
 
 function canonicalFromKey(key: DocKey): string {
@@ -40,6 +26,7 @@ function canonicalFromKey(key: DocKey): string {
 function createLimiter(concurrency: number) {
   let active = 0;
   const queue: (() => void)[] = [];
+
   return function limit<T>(fn: () => Promise<T>): Promise<T> {
     return new Promise((resolve, reject) => {
       const run = () => {
@@ -60,12 +47,12 @@ function createLimiter(concurrency: number) {
   };
 }
 
-export async function fetchRepoDocumentationWithOctokit({
-  owner,
-  repo,
-  octokit,
-  concurrency = 5,
-}: FetchDocsOptions): Promise<Record<DocKey, DocResult>> {
+export async function fetchDocumentation(
+  octokit: Octokit,
+  owner: string,
+  repo: string,
+  concurrency = 5
+): Promise<Record<DocKey, DocResult>> {
   const results: Record<DocKey, DocResult> = {
     readme: { path: null, content: null },
     contributing: { path: null, content: null },
@@ -75,26 +62,21 @@ export async function fetchRepoDocumentationWithOctokit({
 
   const needed = new Set<DocKey>(DEFAULT_TARGETS);
 
+  // Search for documentation files in common directories
   for (const dir of COMMON_DIRS) {
     if (needed.size === 0) break;
+
     try {
       const res = await octokit.request(
         "GET /repos/{owner}/{repo}/contents/{path}",
         {
-          owner: owner,
-          repo: repo,
+          owner,
+          repo,
           path: dir === "" ? "" : dir,
-        },
-      );
-
-      console.log(
-        `\nℹ️ The content length got for #${dir}# is:`,
-        res.data.length,
+        }
       );
 
       if (!Array.isArray(res.data)) {
-        // path is a file (rare when dir is ""), skip
-        console.log(`⚠️ Path ${dir} in ${owner}/${repo} is a file, skipping.`);
         continue;
       }
 
@@ -110,26 +92,26 @@ export async function fetchRepoDocumentationWithOctokit({
           }
         }
       }
-    } catch (err: any) {
-      // ignore 404 (directory doesn't exist) and continue
-      if (err?.status === 404) {
-        console.log(
-          `Directory ${dir} not found in ${owner}/${repo}, continuing.`,
-        );
+    } catch (err: unknown) {
+      if (
+        err &&
+        typeof err === "object" &&
+        "status" in err &&
+        err.status === 404
+      ) {
         continue;
       }
       throw err;
     }
   }
 
-  // Step 3: fetch contents for discovered paths (concurrency-limited)
+  // Fetch content for discovered paths
   const limiter = createLimiter(concurrency);
   const tasks: Promise<void>[] = [];
 
   for (const t of DEFAULT_TARGETS) {
     const entry = results[t];
     if (!entry.path) {
-      console.log(`Path ${t} in ${owner}/${repo} is null, skipping.`);
       entry.content = null;
       continue;
     }
@@ -139,28 +121,20 @@ export async function fetchRepoDocumentationWithOctokit({
         const fileRes = await octokit.request(
           "GET /repos/{owner}/{repo}/contents/{path}",
           {
-            owner: owner,
-            repo: repo,
-            path: entry.path,
-          },
+            owner,
+            repo,
+            path: entry.path!,
+          }
         );
 
-        if (fileRes.data.content) {
-          const fileContent = Buffer.from(
-            fileRes.data.content,
-            "base64",
-          ).toString("utf-8");
-          entry.content = fileContent;
+        if ("content" in fileRes.data && fileRes.data.content) {
+          entry.content = Buffer.from(fileRes.data.content, "base64").toString(
+            "utf-8"
+          );
         } else {
-          console.log(`No content found for ${entry.path} in ${owner}/${repo}`);
           entry.content = null;
         }
-      } catch (err: any) {
-        // if a file was deleted between tree and fetch, or 404, set null
-        console.log(
-          `Failed to fetch content for ${entry.path} in ${owner}/${repo}:`,
-          err.message,
-        );
+      } catch {
         entry.content = null;
       }
     });
@@ -170,4 +144,40 @@ export async function fetchRepoDocumentationWithOctokit({
 
   await Promise.all(tasks);
   return results;
+}
+
+export function resolveGitHubUrl(
+  url: string,
+  owner: string,
+  repo: string,
+  defaultBranch: string
+): string | null {
+  if (url.startsWith("http")) {
+    if (
+      url.includes("github.com") &&
+      url.includes(owner) &&
+      url.includes(repo)
+    ) {
+      return url
+        .replace("github.com", "raw.githubusercontent.com")
+        .replace("/blob/", "/")
+        .replace("/tree/", "/");
+    }
+    return null;
+  }
+
+  const cleanUrl = url.startsWith("./") ? url.substring(2) : url;
+  return `https://raw.githubusercontent.com/${owner}/${repo}/${defaultBranch}/${cleanUrl}`;
+}
+
+export async function fetchUrlContent(url: string): Promise<string | null> {
+  try {
+    const response = await fetch(url);
+    if (response.ok) {
+      return await response.text();
+    }
+  } catch {
+    console.log(`[GitHub] Failed to fetch URL: ${url}`);
+  }
+  return null;
 }

@@ -1,6 +1,7 @@
 import "dotenv/config";
 import { App } from "octokit";
 import { readFileSync } from "fs";
+import { type Octokit } from "octokit";
 
 console.log("Initializing GitHub App with ID:", process.env.GH_APP_ID);
 console.log("Webhook Secret:", process.env.GH_WEBHOOK_SECRET);
@@ -15,3 +16,5 @@ export const app = new App({
     secret: process.env.GH_WEBHOOK_SECRET!,
   },
 });
+
+export type { Octokit };
