@@ -12,5 +12,5 @@ const apiRouter = new Elysia({ prefix: "/api" })
 const app = new Elysia().use(apiRouter).listen(4000);
 
 console.log(
-  `🦊 Elysia is running at ${app.server?.hostname}:${app.server?.port}`,
+  `🦊 Elysia is running at ${app.server?.hostname}:${app.server?.port}`
 );

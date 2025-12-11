@@ -25,8 +25,7 @@
       "@gitbee/db": ["../../packages/db/src"],
       "@gitbee/ai": ["../../packages/ai/src"],
       "@gitbee/octokit": ["../../packages/octokit/src"],
-      "@gitbee/vector-db": ["../../packages/vector-db/src"],
-      "@gitbee/queue": ["../../packages/queue/src"]
+      "@gitbee/vector-db": ["../../packages/vector-db/src"]
     }
   },
   "include": [
