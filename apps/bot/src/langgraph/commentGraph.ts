@@ -1,14 +1,12 @@
 import { StateGraph, START, END, Annotation } from "@langchain/langgraph";
 import { type Octokit } from "@gitbee/octokit";
 
-// --- Types ---
 export interface CommentCheckResult {
   isValid: boolean;
   reason?: string;
   confidence: number;
 }
 
-// --- State Schema using Annotation ---
 const CommentStateAnnotation = Annotation.Root({
   // Input context
   authorAssociation: Annotation<string>,
@@ -42,11 +40,6 @@ const CommentStateAnnotation = Annotation.Root({
 
 type CommentState = typeof CommentStateAnnotation.State;
 
-// --- Node Functions ---
-
-/**
- * Fetches comment history and validates comment relevance to the issue
- */
 async function checkCommentValidity(
   state: CommentState,
 ): Promise<Partial<CommentState>> {
@@ -60,7 +53,6 @@ async function checkCommentValidity(
     issueBody,
   } = state;
 
-  // Fetch comment history
   const response = await octokit.request(
     "GET /repos/{owner}/{repo}/issues/{issue_number}/comments",
     {
@@ -122,9 +114,6 @@ async function checkProfanityAndSpamming(
   return { profanityResult };
 }
 
-/**
- * Combines results from both checks and makes final decision
- */
 async function makeFinalDecision(
   state: CommentState,
 ): Promise<Partial<CommentState>> {
