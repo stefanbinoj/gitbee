@@ -13,7 +13,10 @@
   },
   "dependencies": {
     "@ai-sdk/openai": "^2.0.80",
+    "@langfuse/otel": "^4.4.9",
+    "@langfuse/tracing": "^4.4.9",
     "@openrouter/ai-sdk-provider": "^1.5.3",
+    "@opentelemetry/sdk-node": "^0.208.0",
     "ai": "^6.0.0-beta.144",
     "dotenv": "^17.2.3",
     "zod": "^4.1.13"

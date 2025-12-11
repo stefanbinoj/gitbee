@@ -99,11 +99,11 @@ async function makeFinalDecision(
 export const pullRequestGraph = new StateGraph(PullRequestStateAnnotation)
   .addNode("checkQuality", checkPRQuality)
   .addNode("checkGuidelines", checkGuidelines)
-  .addNode("finalDecision", makeFinalDecision)
+  .addNode("decide", makeFinalDecision)
   .addEdge(START, "checkQuality")
   .addEdge(START, "checkGuidelines")
-  .addEdge("checkQuality", "finalDecision")
-  .addEdge("checkGuidelines", "finalDecision")
-  .addEdge("finalDecision", END);
+  .addEdge("checkQuality", "decide")
+  .addEdge("checkGuidelines", "decide")
+  .addEdge("decide", END);
 
 export type { PullRequestState };

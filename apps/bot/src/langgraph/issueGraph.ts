@@ -92,11 +92,11 @@ async function makeFinalDecision(
 export const issueGraph = new StateGraph(IssueStateAnnotation)
   .addNode("checkQuality", checkIssueQuality)
   .addNode("checkDuplicates", checkDuplicates)
-  .addNode("finalDecision", makeFinalDecision)
+  .addNode("decide", makeFinalDecision)
   .addEdge(START, "checkQuality")
   .addEdge(START, "checkDuplicates")
-  .addEdge("checkQuality", "finalDecision")
-  .addEdge("checkDuplicates", "finalDecision")
-  .addEdge("finalDecision", END);
+  .addEdge("checkQuality", "decide")
+  .addEdge("checkDuplicates", "decide")
+  .addEdge("decide", END);
 
 export type { IssueState };

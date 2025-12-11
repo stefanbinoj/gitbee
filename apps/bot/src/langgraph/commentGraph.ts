@@ -168,18 +168,14 @@ async function makeFinalDecision(
 
 // --- Graph Definition ---
 export const commentGraph = new StateGraph(CommentStateAnnotation)
-  // Add nodes
   .addNode("checkValidity", checkCommentValidity)
   .addNode("checkProfanity", checkProfanityAndSpamming)
-  .addNode("finalDecision", makeFinalDecision)
-  // Parallel execution: both checks run from START
+  .addNode("decide", makeFinalDecision)
   .addEdge(START, "checkValidity")
   .addEdge(START, "checkProfanity")
-  // Both checks feed into final decision
-  .addEdge("checkValidity", "finalDecision")
-  .addEdge("checkProfanity", "finalDecision")
-  // End after final decision
-  .addEdge("finalDecision", END);
+  .addEdge("checkValidity", "decide")
+  .addEdge("checkProfanity", "decide")
+  .addEdge("decide", END);
 
 // Export types for use in handlers
 export type { CommentState };
