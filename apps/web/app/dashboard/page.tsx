@@ -8,11 +8,11 @@ import {
   GitPullRequest,
   Zap,
   TrendingUp,
-  Clock,
   ExternalLink,
   Key,
   BookOpen,
   ArrowRight,
+  Clock,
 } from "lucide-react";
 
 // Simple bar chart data
@@ -68,7 +68,7 @@ export default function DashboardPage() {
   const session = authClient.useSession();
   console.log(session);
   const maxValue = Math.max(
-    ...weeklyData.map((d) => Math.max(d.issues, d.prs))
+    ...weeklyData.map((d) => Math.max(d.issues, d.prs)),
   );
 
   return (
@@ -259,45 +259,72 @@ export default function DashboardPage() {
       {/* Bottom Row */}
       <div className="grid gap-4 md:grid-cols-2">
         {/* Recent Activity */}
-        <Card className="bg-neutral-900 border-neutral-700">
-          <CardHeader>
+        <Card className="bg-neutral-900 border-neutral-700 flex flex-col">
+          <CardHeader className="border-b border-neutral-800 pb-4">
             <div className="flex items-center justify-between">
-              <CardTitle className="text-sm font-medium text-neutral-300 tracking-wider">
-                RECENT ACTIVITY
-              </CardTitle>
+              <div className="flex items-center gap-3">
+                <div className="p-2 bg-yellow-500/10 rounded-full">
+                  <Clock className="w-5 h-5 text-yellow-500" />
+                </div>
+                <div>
+                  <CardTitle className="text-sm font-medium text-neutral-300 tracking-wider uppercase">
+                    Recent Activity
+                  </CardTitle>
+                </div>
+              </div>
               <Button
                 variant="ghost"
                 size="sm"
-                className="text-neutral-400 hover:text-yellow-500"
+                className="text-neutral-400 hover:text-white hover:bg-neutral-800 h-7 text-xs"
               >
                 View All
-                <ArrowRight className="w-4 h-4 ml-1" />
+                <ArrowRight className="w-3 h-3 ml-1" />
               </Button>
             </div>
           </CardHeader>
-          <CardContent>
-            <div className="space-y-4">
+          <CardContent className="p-0 flex-1">
+            <div className="divide-y divide-neutral-800">
               {recentActivity.map((activity) => (
                 <div
                   key={activity.id}
-                  className="flex items-center gap-4 p-3 rounded-lg hover:bg-neutral-800/50 transition-colors"
+                  className="flex items-center gap-4 p-4 hover:bg-neutral-800/30 transition-colors group cursor-default"
                 >
-                  <div className="h-10 w-10 rounded-lg bg-yellow-500/10 flex items-center justify-center shrink-0">
+                  <div
+                    className={`h-8 w-8 rounded flex items-center justify-center shrink-0 border ${
+                      activity.type === "issue"
+                        ? "bg-blue-500/10 border-blue-500/20 text-blue-500"
+                        : "bg-purple-500/10 border-purple-500/20 text-purple-500"
+                    }`}
+                  >
                     {activity.type === "issue" ? (
-                      <MessageSquare className="w-5 h-5 text-yellow-500" />
+                      <MessageSquare className="w-4 h-4" />
                     ) : (
-                      <GitPullRequest className="w-5 h-5 text-yellow-500" />
+                      <GitPullRequest className="w-4 h-4" />
                     )}
                   </div>
                   <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium text-white truncate">
-                      {activity.title}
+                    <div className="flex items-center gap-2 mb-0.5">
+                      <span className="text-sm font-medium text-neutral-200 truncate group-hover:text-yellow-500 transition-colors">
+                        {activity.title}
+                      </span>
+                      <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-neutral-800 text-neutral-400 border border-neutral-700">
+                        #{140 + activity.id}
+                      </span>
+                    </div>
+                    <p className="text-xs text-neutral-500 font-mono flex items-center gap-2">
+                      <span>{activity.repo}</span>
+                      <span className="w-0.5 h-0.5 bg-neutral-600 rounded-full" />
+                      <span>{activity.time}</span>
                     </p>
-                    <p className="text-xs text-neutral-400">{activity.repo}</p>
                   </div>
-                  <div className="flex items-center gap-1 text-xs text-neutral-500 shrink-0">
-                    <Clock className="w-3 h-3" />
-                    {activity.time}
+                  <div className="opacity-0 group-hover:opacity-100 transition-opacity">
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="h-7 w-7 text-neutral-400 hover:text-white"
+                    >
+                      <ExternalLink className="w-3.5 h-3.5" />
+                    </Button>
                   </div>
                 </div>
               ))}
@@ -306,55 +333,74 @@ export default function DashboardPage() {
         </Card>
 
         {/* Quick Actions */}
-        <Card className="bg-neutral-900 border-neutral-700">
-          <CardHeader>
+        <Card className="bg-neutral-900 border-neutral-700 flex flex-col">
+          <CardHeader className="border-b border-neutral-800 pb-4">
             <CardTitle className="text-sm font-medium text-neutral-300 tracking-wider">
               QUICK ACTIONS
             </CardTitle>
           </CardHeader>
-          <CardContent>
+          <CardContent className="p-6">
             <div className="grid grid-cols-2 gap-4">
               <Button
                 variant="outline"
-                className="h-auto p-4 flex flex-col items-center gap-2 border-neutral-700 text-neutral-300 hover:bg-neutral-800 hover:text-yellow-500 hover:border-yellow-500/50 bg-transparent"
+                className="h-auto p-4 flex flex-col items-center gap-3 border-neutral-800 bg-neutral-900/50 text-neutral-300 hover:bg-neutral-800 hover:text-yellow-500 hover:border-yellow-500/30 transition-all duration-300 group"
               >
-                <GitBranch className="w-6 h-6" />
-                <span className="text-sm">Connect Repo</span>
+                <div className="p-3 rounded-full bg-neutral-800 group-hover:bg-yellow-500/10 transition-colors">
+                  <GitBranch className="w-5 h-5 group-hover:text-yellow-500" />
+                </div>
+                <span className="text-xs font-medium tracking-wide uppercase">
+                  Connect Repo
+                </span>
               </Button>
               <Button
                 variant="outline"
-                className="h-auto p-4 flex flex-col items-center gap-2 border-neutral-700 text-neutral-300 hover:bg-neutral-800 hover:text-yellow-500 hover:border-yellow-500/50 bg-transparent"
+                className="h-auto p-4 flex flex-col items-center gap-3 border-neutral-800 bg-neutral-900/50 text-neutral-300 hover:bg-neutral-800 hover:text-yellow-500 hover:border-yellow-500/30 transition-all duration-300 group"
               >
-                <BookOpen className="w-6 h-6" />
-                <span className="text-sm">View Docs</span>
+                <div className="p-3 rounded-full bg-neutral-800 group-hover:bg-yellow-500/10 transition-colors">
+                  <BookOpen className="w-5 h-5 group-hover:text-yellow-500" />
+                </div>
+                <span className="text-xs font-medium tracking-wide uppercase">
+                  View Docs
+                </span>
               </Button>
               <Button
                 variant="outline"
-                className="h-auto p-4 flex flex-col items-center gap-2 border-neutral-700 text-neutral-300 hover:bg-neutral-800 hover:text-yellow-500 hover:border-yellow-500/50 bg-transparent"
+                className="h-auto p-4 flex flex-col items-center gap-3 border-neutral-800 bg-neutral-900/50 text-neutral-300 hover:bg-neutral-800 hover:text-yellow-500 hover:border-yellow-500/30 transition-all duration-300 group"
               >
-                <Key className="w-6 h-6" />
-                <span className="text-sm">API Keys</span>
+                <div className="p-3 rounded-full bg-neutral-800 group-hover:bg-yellow-500/10 transition-colors">
+                  <Key className="w-5 h-5 group-hover:text-yellow-500" />
+                </div>
+                <span className="text-xs font-medium tracking-wide uppercase">
+                  API Keys
+                </span>
               </Button>
               <Button
                 variant="outline"
-                className="h-auto p-4 flex flex-col items-center gap-2 border-neutral-700 text-neutral-300 hover:bg-neutral-800 hover:text-yellow-500 hover:border-yellow-500/50 bg-transparent"
+                className="h-auto p-4 flex flex-col items-center gap-3 border-neutral-800 bg-neutral-900/50 text-neutral-300 hover:bg-neutral-800 hover:text-yellow-500 hover:border-yellow-500/30 transition-all duration-300 group"
               >
-                <ExternalLink className="w-6 h-6" />
-                <span className="text-sm">GitHub App</span>
+                <div className="p-3 rounded-full bg-neutral-800 group-hover:bg-yellow-500/10 transition-colors">
+                  <ExternalLink className="w-5 h-5 group-hover:text-yellow-500" />
+                </div>
+                <span className="text-xs font-medium tracking-wide uppercase">
+                  GitHub App
+                </span>
               </Button>
             </div>
 
             {/* Pro Tip */}
-            <div className="mt-6 p-4 rounded-lg bg-yellow-500/10 border border-yellow-500/20">
+            <div className="mt-6 p-4 rounded-lg bg-gradient-to-r from-yellow-500/10 to-transparent border border-yellow-500/10">
               <div className="flex items-start gap-3">
-                <TrendingUp className="w-5 h-5 text-yellow-500 mt-0.5 shrink-0" />
+                <div className="p-1.5 bg-yellow-500/10 rounded-md shrink-0">
+                  <TrendingUp className="w-4 h-4 text-yellow-500" />
+                </div>
                 <div>
-                  <p className="text-sm font-medium text-yellow-500">
+                  <p className="text-sm font-medium text-yellow-500 mb-1">
                     Performance Tip
                   </p>
-                  <p className="text-xs text-neutral-400 mt-1">
+                  <p className="text-xs text-neutral-400 leading-relaxed">
                     Add more documentation to your knowledge base to improve
-                    GitBee's response accuracy by up to 40%.
+                    GitBee's response accuracy by up to{" "}
+                    <span className="text-white font-bold">40%</span>.
                   </p>
                 </div>
               </div>

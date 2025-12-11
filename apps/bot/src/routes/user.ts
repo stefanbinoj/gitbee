@@ -1,74 +1,70 @@
 import { Elysia, t } from "elysia";
+import {
+  db,
+  reportSchema,
+  installationSchema,
+  installationRepositoriesSchema,
+} from "@gitbee/db";
+import { eq, and, inArray, desc, getTableColumns } from "drizzle-orm";
 
-interface User {
-  id: number;
-  name: string;
-  email: string;
-}
+export const userRouter = new Elysia({ prefix: "/users" }).get(
+  "/reports/:githubAccountId",
+  async ({ params }) => {
+    const { githubAccountId } = params;
 
-let users: User[] = [];
-let nextId = 1;
+    // Convert string to number since GitHub IDs are integers
+    const accountId = parseInt(githubAccountId, 10);
 
-export const userRouter = new Elysia({ prefix: "/users" })
-  .get("/", () => users)
-  .get(
-    "/:id",
-    ({ params }) => {
-      const user = users.find((u) => u.id === +params.id);
-      if (!user) throw new Error("User not found");
-      return user;
-    },
-    {
-      params: t.Object({
-        id: t.String(),
-      }),
-    },
-  )
-  .post(
-    "/",
-    ({ body }) => {
-      const newUser = { ...body, id: nextId++ };
-      users.push(newUser);
-      return newUser;
-    },
-    {
-      body: t.Object({
-        name: t.String(),
-        email: t.String(),
-      }),
-    },
-  )
-  .put(
-    "/:id",
-    ({ params, body }) => {
-      const index = users.findIndex((u) => u.id === +params.id);
-      if (index === -1) throw new Error("User not found");
-      users[index] = { ...users[index], ...body };
-      return users[index];
-    },
-    {
-      params: t.Object({
-        id: t.String(),
-      }),
-      body: t.Partial(
-        t.Object({
-          name: t.String(),
-          email: t.String(),
-        }),
-      ),
-    },
-  )
-  .delete(
-    "/:id",
-    ({ params }) => {
-      const index = users.findIndex((u) => u.id === +params.id);
-      if (index === -1) throw new Error("User not found");
-      users.splice(index, 1);
-      return { message: "User deleted" };
-    },
-    {
-      params: t.Object({
-        id: t.String(),
-      }),
-    },
-  );
+    if (isNaN(accountId)) {
+      return { error: "Invalid GitHub account ID" };
+    }
+
+    try {
+      // Get all installations for this user
+      const userInstallations = await db
+        .select({ installationId: installationSchema.installationId })
+        .from(installationSchema)
+        .where(
+          and(
+            eq(installationSchema.senderId, accountId),
+            eq(installationSchema.isRemoved, false)
+          )
+        );
+
+      if (userInstallations.length === 0) {
+        return { reports: [] };
+      }
+
+      const installationIds = userInstallations.map(
+        (inst) => inst.installationId
+      );
+
+      // Get reports for these installations
+      const reports = await db
+        .select({
+          ...getTableColumns(reportSchema),
+          repositoryFullName: installationRepositoriesSchema.repositoryFullName,
+        })
+        .from(reportSchema)
+        .leftJoin(
+          installationRepositoriesSchema,
+          eq(
+            reportSchema.repositoryId,
+            installationRepositoriesSchema.repositoryId
+          )
+        )
+        .where(inArray(reportSchema.installationId, installationIds))
+        .orderBy(desc(reportSchema.createdAt));
+
+      return { reports };
+    } catch (error) {
+      console.error("Error fetching user reports:", error);
+      return { error: "Failed to fetch reports" };
+    }
+  },
+  {
+    params: t.Object({
+      githubAccountId: t.String(),
+    }),
+  }
+);

@@ -1,168 +1,132 @@
-"use client"
+"use client";
 
-import { useState } from "react"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
-import { Key, Plus, Copy, Eye, EyeOff, Trash2, Shield, Clock, Activity } from "lucide-react"
+import { useState } from "react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import { Info, Key } from "lucide-react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 export default function ApiKeysPage() {
-  const [showKey, setShowKey] = useState<string | null>(null)
+  const [open, setOpen] = useState(false);
 
   const apiKeys = [
     {
-      id: "key_1",
-      name: "Production API Key",
-      key: "gb_live_sk_1a2b3c4d5e6f7g8h9i0j",
-      created: "2025-05-15",
-      lastUsed: "2 hours ago",
-      status: "active",
-      requests: "12,847",
+      name: "Placeholder",
+      key: "sk-or-v1-843...3fd",
+      usage: "< $0.001",
+      limit: "$2",
     },
-    {
-      id: "key_2",
-      name: "Development Key",
-      key: "gb_test_sk_9z8y7x6w5v4u3t2s1r0q",
-      created: "2025-06-01",
-      lastUsed: "5 min ago",
-      status: "active",
-      requests: "3,291",
-    },
-    {
-      id: "key_3",
-      name: "CI/CD Pipeline",
-      key: "gb_live_sk_abcdef123456789xyz",
-      created: "2025-04-20",
-      lastUsed: "1 day ago",
-      status: "active",
-      requests: "8,456",
-    },
-  ]
-
-  const maskKey = (key: string) => {
-    return key.substring(0, 12) + "••••••••••••"
-  }
+  ];
 
   return (
     <div className="space-y-6">
-      {/* Action Button */}
-      <div className="flex justify-end">
-        <Button className="bg-yellow-500 hover:bg-yellow-600 text-neutral-900 font-semibold">
-          <Plus className="w-4 h-4 mr-2" />
-          Generate New Key
-        </Button>
-      </div>
-
-      {/* Stats */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <Card className="bg-neutral-900 border-neutral-700">
-          <CardContent className="p-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-xs text-neutral-400 tracking-wider">ACTIVE KEYS</p>
-                <p className="text-2xl font-bold text-white font-mono">3</p>
-              </div>
-              <Key className="w-8 h-8 text-yellow-500" />
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card className="bg-neutral-900 border-neutral-700">
-          <CardContent className="p-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-xs text-neutral-400 tracking-wider">TOTAL REQUESTS</p>
-                <p className="text-2xl font-bold text-white font-mono">24,594</p>
-              </div>
-              <Activity className="w-8 h-8 text-yellow-500" />
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card className="bg-neutral-900 border-neutral-700">
-          <CardContent className="p-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-xs text-neutral-400 tracking-wider">RATE LIMIT</p>
-                <p className="text-2xl font-bold text-white font-mono">10K/hr</p>
-              </div>
-              <Shield className="w-8 h-8 text-yellow-500" />
-            </div>
-          </CardContent>
-        </Card>
-      </div>
-
-      {/* API Keys List */}
       <Card className="bg-neutral-900 border-neutral-700">
         <CardHeader>
-          <CardTitle className="text-sm font-medium text-neutral-300 tracking-wider">YOUR API KEYS</CardTitle>
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div className="p-2 bg-yellow-500/10 rounded-full">
+                <Key className="w-5 h-5 text-yellow-500" />
+              </div>
+              <div>
+                <CardTitle className="text-sm font-medium text-neutral-300 tracking-wider uppercase">
+                  API Keys
+                </CardTitle>
+                <p className="text-sm text-neutral-400 mt-1">
+                  Manage your API keys for programmatic access
+                </p>
+              </div>
+            </div>
+            <Dialog open={open} onOpenChange={setOpen}>
+              <DialogTrigger asChild>
+                <Button className="bg-yellow-500 hover:bg-yellow-600 text-neutral-900 font-semibold">
+                  Add API Key
+                </Button>
+              </DialogTrigger>
+              <DialogContent className="sm:max-w-[425px] bg-neutral-900 border-neutral-700 text-white">
+                <DialogHeader>
+                  <DialogTitle>Add API Key</DialogTitle>
+                  <DialogDescription className="text-neutral-400">
+                    Add your OpenRouter API key to access all models.
+                  </DialogDescription>
+                </DialogHeader>
+                <div className="grid gap-4 py-4">
+                  <div className="flex flex-col gap-2">
+                    <Label htmlFor="key" className="text-white">
+                      API Key
+                    </Label>
+                    <Input
+                      id="key"
+                      placeholder="e.g. Development Key"
+                      className="bg-neutral-800 border-neutral-600 text-white focus-visible:ring-yellow-500"
+                    />
+                  </div>
+                </div>
+                <DialogFooter>
+                  <Button
+                    disabled
+                    className="bg-yellow-500 text-neutral-900 hover:bg-yellow-600 font-semibold disabled:opacity-50 disabled:cursor-not-allowed w-full sm:w-auto"
+                  >
+                    Coming Soon
+                  </Button>
+                </DialogFooter>
+              </DialogContent>
+            </Dialog>
+          </div>
         </CardHeader>
         <CardContent>
-          <div className="space-y-4">
-            {apiKeys.map((apiKey) => (
-              <div
-                key={apiKey.id}
-                className="border border-neutral-700 rounded-lg p-4 hover:border-yellow-500/50 transition-colors"
-              >
-                <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
-                  <div className="flex items-start gap-4">
-                    <div className="h-10 w-10 rounded-lg bg-yellow-500/10 flex items-center justify-center">
-                      <Key className="w-5 h-5 text-yellow-500" />
-                    </div>
-                    <div className="space-y-1">
-                      <h3 className="text-sm font-semibold text-white">{apiKey.name}</h3>
-                      <div className="flex items-center gap-2">
-                        <code className="text-xs text-neutral-400 font-mono bg-neutral-800 px-2 py-1 rounded">
-                          {showKey === apiKey.id ? apiKey.key : maskKey(apiKey.key)}
-                        </code>
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          className="h-6 w-6 text-neutral-400 hover:text-yellow-500"
-                          onClick={() => setShowKey(showKey === apiKey.id ? null : apiKey.id)}
-                        >
-                          {showKey === apiKey.id ? (
-                            <EyeOff className="w-3 h-3" />
-                          ) : (
-                            <Eye className="w-3 h-3" />
-                          )}
-                        </Button>
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          className="h-6 w-6 text-neutral-400 hover:text-yellow-500"
-                        >
-                          <Copy className="w-3 h-3" />
-                        </Button>
-                      </div>
-                    </div>
-                  </div>
+          <div className="flex items-center gap-2 text-neutral-400 text-sm mb-6">
+            <Info className="w-4 h-4" />
+            <span>
+              Manage your API keys to access all models from OpenRouter
+            </span>
+          </div>
 
-                  <div className="flex flex-wrap items-center gap-4 lg:gap-6">
-                    <div className="text-xs text-neutral-400">
-                      <div className="flex items-center gap-1">
-                        <Clock className="w-3 h-3" />
-                        <span>Created: {apiKey.created}</span>
-                      </div>
-                      <div className="flex items-center gap-1 mt-1">
-                        <Activity className="w-3 h-3" />
-                        <span>Last used: {apiKey.lastUsed}</span>
-                      </div>
+          <div className="border border-neutral-800 rounded-lg overflow-hidden bg-black">
+            <div className="grid grid-cols-12 gap-4 p-4 text-sm text-neutral-400 border-b border-neutral-800">
+              <div className="col-span-6">Key</div>
+              <div className="col-span-3 text-right">Usage</div>
+              <div className="col-span-3 text-right pr-8">Limit</div>
+            </div>
+
+            {apiKeys.map((item, index) => (
+              <div
+                key={index}
+                className="grid grid-cols-12 gap-4 p-4 text-sm border-b last:border-0 border-neutral-800 items-center hover:bg-neutral-900/50 transition-colors"
+              >
+                <div className="col-span-6">
+                  <div className="font-medium text-white mb-1">{item.name}</div>
+                  <div className="text-neutral-500 font-mono text-xs">
+                    {item.key}
+                  </div>
+                </div>
+                <div className="col-span-3 text-right text-neutral-300 font-mono">
+                  {item.usage}
+                </div>
+                <div className="col-span-3 flex items-center justify-end gap-4">
+                  <div className="flex items-center gap-2 w-full justify-end">
+                    <span className="text-neutral-300 font-mono">
+                      {item.limit}
+                    </span>
+                    <span className="text-[10px] border border-neutral-700 rounded px-1 py-0.5 text-neutral-400 uppercase tracking-wide">
+                      Total
+                    </span>
+                  </div>
+                  <div className="w-8 flex justify-center">
+                    <div className="flex flex-col gap-0.5 cursor-pointer p-1 hover:bg-neutral-800 rounded">
+                      <div className="w-0.5 h-0.5 bg-neutral-500 rounded-full" />
+                      <div className="w-0.5 h-0.5 bg-neutral-500 rounded-full" />
+                      <div className="w-0.5 h-0.5 bg-neutral-500 rounded-full" />
                     </div>
-                    <div className="text-right">
-                      <p className="text-xs text-neutral-400">Requests</p>
-                      <p className="text-sm font-mono text-white">{apiKey.requests}</p>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <span className="h-2 w-2 rounded-full bg-green-500"></span>
-                      <span className="text-xs text-neutral-300 uppercase tracking-wider">{apiKey.status}</span>
-                    </div>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="text-neutral-400 hover:text-red-500 hover:bg-red-500/10"
-                    >
-                      <Trash2 className="w-4 h-4" />
-                    </Button>
                   </div>
                 </div>
               </div>
@@ -170,34 +134,6 @@ export default function ApiKeysPage() {
           </div>
         </CardContent>
       </Card>
-
-      {/* Usage Guide */}
-      <Card className="bg-neutral-900 border-neutral-700">
-        <CardHeader>
-          <CardTitle className="text-sm font-medium text-neutral-300 tracking-wider">QUICK START</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="space-y-4">
-            <p className="text-sm text-neutral-400">
-              Use your API key to authenticate requests to the GitBee API.
-            </p>
-            <div className="bg-neutral-800 rounded-lg p-4">
-              <code className="text-sm text-yellow-500 font-mono">
-                curl -H "Authorization: Bearer YOUR_API_KEY" \<br />
-                &nbsp;&nbsp;https://api.gitbee.dev/v1/repositories
-              </code>
-            </div>
-            <div className="flex gap-2">
-              <Button variant="outline" className="border-neutral-700 text-neutral-300 hover:bg-neutral-800 hover:text-yellow-500 bg-transparent">
-                View Documentation
-              </Button>
-              <Button variant="outline" className="border-neutral-700 text-neutral-300 hover:bg-neutral-800 hover:text-yellow-500 bg-transparent">
-                API Reference
-              </Button>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
     </div>
-  )
+  );
 }
