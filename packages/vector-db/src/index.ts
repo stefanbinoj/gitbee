@@ -28,8 +28,8 @@ const documentationSchema = new arrow.Schema([
   new arrow.Field("owner", new arrow.Utf8(), false),
   new arrow.Field("repo", new arrow.Utf8(), false),
   new arrow.Field("chunk_index", new arrow.Int32(), false),
-  new arrow.Field("header_path", new arrow.Utf8(), false),
   new arrow.Field("doc_type", new arrow.Utf8(), false),
+  new arrow.Field("token_count", new arrow.Int32(), false),
 ]);
 
 // Initialize table
@@ -47,8 +47,8 @@ export interface ChunkData {
   owner: string;
   repo: string;
   chunk_index: number;
-  header_path: string;
   doc_type: string;
+  token_count: number;
 }
 
 export async function insertChunks(chunks: ChunkData[]): Promise<void> {
@@ -66,8 +66,8 @@ export async function insertChunks(chunks: ChunkData[]): Promise<void> {
     owner: chunk.owner,
     repo: chunk.repo,
     chunk_index: chunk.chunk_index,
-    header_path: chunk.header_path,
     doc_type: chunk.doc_type,
+    token_count: chunk.token_count,
   }));
   await table.add(records);
   console.log(

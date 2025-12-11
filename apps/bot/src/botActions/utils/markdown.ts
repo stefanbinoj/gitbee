@@ -1,13 +1,6 @@
-import type {
-  DocKey,
-  DocResult,
-  MarkdownSection,
-  DocumentSection,
-} from "@/botActions/types";
+import type { DocKey, DocResult, DocumentSection } from "@/botActions/types";
 import { MAX_LINK_DEPTH } from "@/botActions/constants";
-import { countTokens } from "./tokenizer";
 import { resolveGitHubUrl, fetchUrlContent } from "./github";
-import { MIN_SECTION_TOKENS } from "@/botActions/constants";
 
 export function extractMarkdownLinks(
   content: string
@@ -72,74 +65,6 @@ export function splitByDocumentType(
   }
 
   return documentSections;
-}
-
-export function parseMarkdownSections(
-  content: string,
-  docType: string
-): MarkdownSection[] {
-  const lines = content.split("\n");
-  const sections: MarkdownSection[] = [];
-  const headerStack: { text: string; level: number }[] = [];
-
-  const docTypeHeader = `${docType.charAt(0).toUpperCase() + docType.slice(1).replace(/_/g, " ")} Data`;
-
-  let currentContent = "";
-  let currentHeaderPath = docTypeHeader;
-  let currentLevel = 0;
-  let inCodeBlock = false;
-
-  for (const line of lines) {
-    if (line.trim().startsWith("```")) {
-      inCodeBlock = !inCodeBlock;
-    }
-
-    const headerMatch = !inCodeBlock ? line.match(/^(#{1,6})\s+(.+)$/) : null;
-
-    if (headerMatch) {
-      if (currentContent.trim()) {
-        const tokenCount = countTokens(currentContent.trim());
-        sections.push({
-          headerPath: currentHeaderPath,
-          content: currentContent.trim(),
-          level: currentLevel,
-          docType,
-          tokenCount,
-        });
-      }
-
-      const level = headerMatch[1].length;
-      const headerText = headerMatch[2].trim();
-
-      while (
-        headerStack.length > 0 &&
-        headerStack[headerStack.length - 1].level >= level
-      ) {
-        headerStack.pop();
-      }
-
-      headerStack.push({ text: headerText, level });
-      currentHeaderPath =
-        docTypeHeader + " > " + headerStack.map((h) => h.text).join(" > ");
-      currentLevel = level;
-      currentContent = "";
-    } else {
-      currentContent += line + "\n";
-    }
-  }
-
-  if (currentContent.trim()) {
-    const tokenCount = countTokens(currentContent.trim());
-    sections.push({
-      headerPath: currentHeaderPath,
-      content: currentContent.trim(),
-      level: currentLevel,
-      docType,
-      tokenCount,
-    });
-  }
-
-  return sections.filter((s) => s.tokenCount >= MIN_SECTION_TOKENS);
 }
 
 async function recursiveFetchContent(

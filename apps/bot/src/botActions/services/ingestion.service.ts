@@ -90,22 +90,18 @@ export async function ingestRepository(
         owner,
         repo,
         chunk_index: chunk.chunkIndex,
-        header_path: chunk.headerPath,
         doc_type: chunk.docType,
+        token_count: chunk.tokenCount,
       })
     );
 
     // Insert into vector database
-    console.log(
-      `[Ingestion] Inserting ${chunkData.length} chunks into database`
-    );
     await insertChunks(chunkData);
 
     if (reportId) {
       await reportService.updateReportStatus(reportId, "completed");
     }
 
-    console.log(`[Ingestion] Completed for ${owner}/${repo}`);
     return {
       status: "completed",
       message: `Ingested ${chunks.length} chunks`,

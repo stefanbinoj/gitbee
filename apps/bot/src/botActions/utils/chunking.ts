@@ -1,7 +1,7 @@
-import type { ContentChunk, MarkdownSection } from "@/botActions/types";
+import type { ContentChunk, DocumentSection } from "@/botActions/types";
 import { MAX_CHUNK_TOKENS, CHUNK_OVERLAP_TOKENS } from "@/botActions/constants";
 import { countTokens, encodeText, decodeTokens } from "./tokenizer";
-import { splitByDocumentType, parseMarkdownSections } from "./markdown";
+import { splitByDocumentType } from "./markdown";
 
 function findSentenceBoundary(
   text: string,
@@ -81,18 +81,19 @@ function splitTextByTokens(
   return chunks;
 }
 
-function createChunksFromSections(sections: MarkdownSection[]): ContentChunk[] {
+function createChunksFromSections(sections: DocumentSection[]): ContentChunk[] {
   const chunks: ContentChunk[] = [];
   let globalChunkIndex = 0;
 
   for (const section of sections) {
-    if (section.tokenCount <= MAX_CHUNK_TOKENS) {
+    const tokenCount = countTokens(section.content);
+
+    if (tokenCount <= MAX_CHUNK_TOKENS) {
       chunks.push({
-        text: section.content,
-        headerPath: section.headerPath,
+        text: `${section.docType}: \n${section.content}`,
         chunkIndex: globalChunkIndex++,
         docType: section.docType,
-        tokenCount: section.tokenCount,
+        tokenCount: countTokens(`${section.docType}: \n${section.content}`),
       });
     } else {
       const textChunks = splitTextByTokens(
@@ -103,12 +104,13 @@ function createChunksFromSections(sections: MarkdownSection[]): ContentChunk[] {
 
       for (let i = 0; i < textChunks.length; i++) {
         const chunkText = textChunks[i];
+        const enrichedText = `${section.docType} (Part ${i + 1}/${textChunks.length}) :\n${chunkText}`;
+
         chunks.push({
-          text: chunkText,
-          headerPath: `${section.headerPath} (Part ${i + 1}/${textChunks.length})`,
+          text: enrichedText,
           chunkIndex: globalChunkIndex++,
           docType: section.docType,
-          tokenCount: countTokens(chunkText),
+          tokenCount: countTokens(enrichedText),
         });
       }
     }
@@ -127,16 +129,11 @@ export function chunkContent(aggregatedContent: string): ContentChunk[] {
   const allChunks: ContentChunk[] = [];
 
   for (const docSection of documentSections) {
-    const markdownSections = parseMarkdownSections(
-      docSection.content,
-      docSection.docType
-    );
-
-    if (markdownSections.length === 0) {
+    if (!docSection.content.trim()) {
       continue;
     }
 
-    const chunks = createChunksFromSections(markdownSections);
+    const chunks = createChunksFromSections([docSection]);
     allChunks.push(...chunks);
   }
 

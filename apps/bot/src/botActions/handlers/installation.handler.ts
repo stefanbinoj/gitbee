@@ -44,16 +44,13 @@ async function processRepository(
 
   if (isNew) {
     console.log(`[Installation] Starting ingestion for ${repo.full_name}`);
-    const result = await ingestionService.ingestRepositoryWithReport(
+    await ingestionService.ingestRepositoryWithReport(
       octokit,
       installationId,
       targetId,
       repo.id,
       owner,
       repoName
-    );
-    console.log(
-      `[Installation] Ingestion result for ${repo.full_name}: ${result.status}`
     );
   }
 }

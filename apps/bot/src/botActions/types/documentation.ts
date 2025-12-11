@@ -23,19 +23,8 @@ export interface DocumentSection {
   content: string;
 }
 
-/** Parsed markdown section with metadata */
-export interface MarkdownSection {
-  headerPath: string;
-  content: string;
-  level: number;
-  docType: string;
-  tokenCount: number;
-}
-
-/** A chunk of content ready for embedding */
 export interface ContentChunk {
   text: string;
-  headerPath: string;
   chunkIndex: number;
   docType: string;
   tokenCount: number;
