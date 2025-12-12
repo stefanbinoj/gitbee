@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 
-export async function middleware(request: NextRequest) {
+export async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
   // Check if the route is a dashboard route
@@ -26,6 +26,8 @@ export async function middleware(request: NextRequest) {
 
   // If on login page and already authenticated, redirect to dashboard
   if (pathname === "/login") {
+    const cookies = request.cookies.getAll();
+    console.log("All cookies:", cookies.map((c) => c.name).join(", "));
     const sessionToken =
       request.cookies.get("better-auth.session_token")?.value ||
       request.cookies.get("__Secure-better-auth.session_token")?.value;

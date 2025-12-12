@@ -6,7 +6,7 @@ import { ProfessionalitySystemPrompt } from "./systemPrompt/professionalism";
 import { ValiditySystemPrompt } from "./systemPrompt/validity";
 import { MODELS } from "./constants";
 
-interface CommentCheckResult {
+export interface CommentCheckResult {
   is_valid: boolean; // handle false
   comment?: string;
 }
@@ -46,17 +46,30 @@ const CommentStateAnnotation = Annotation.Root({
 
 type CommentState = typeof CommentStateAnnotation.State;
 
-async function checkCommentValidity(state: CommentState): Promise<Partial<CommentState>> {
-  const { owner, repo, issueNumber, octokit, commentBody, issueTitle, issueBody } = state;
-
-  const response = await octokit.request("GET /repos/{owner}/{repo}/issues/{issue_number}/comments", {
+async function checkCommentValidity(
+  state: CommentState,
+): Promise<Partial<CommentState>> {
+  const {
     owner,
     repo,
-    issue_number: issueNumber,
-    per_page: 20,
-    sort: "created",
-    direction: "asc",
-  });
+    issueNumber,
+    octokit,
+    commentBody,
+    issueTitle,
+    issueBody,
+  } = state;
+
+  const response = await octokit.request(
+    "GET /repos/{owner}/{repo}/issues/{issue_number}/comments",
+    {
+      owner,
+      repo,
+      issue_number: issueNumber,
+      per_page: 20,
+      sort: "created",
+      direction: "asc",
+    },
+  );
 
   let history: string | undefined;
 
@@ -75,7 +88,9 @@ async function checkCommentValidity(state: CommentState): Promise<Partial<Commen
 
   const queryVector = await embedTexts([commentBody]);
   const vectorSearch = await searchSimilar(queryVector[0], owner, repo, 2);
-  console.log(`[CommentGraph] Retrieved ${vectorSearch.length} similar chunks for validity check`);
+  console.log(
+    `[CommentGraph] Retrieved ${vectorSearch.length} similar chunks for validity check`,
+  );
 
   const prompt = `Issue Title: """${issueTitle}"""
 Issue Body: """${issueBody}"""
@@ -86,11 +101,18 @@ ${history ? `Comment History: """${history}"""` : ""}
 Based on the above information, is the user comment relevant and appropriate for the issue? Provide a detailed analysis.`;
 
   try {
-    const llmResponse = await aiClient(MODELS.CHEAP, prompt, ValiditySystemPrompt);
+    const llmResponse = await aiClient(
+      MODELS.CHEAP,
+      prompt,
+      ValiditySystemPrompt,
+    );
     const text = llmResponse.text.trim();
     const jsonMatch = text.match(/\{[\s\S]*\}/);
     if (!jsonMatch) {
-      console.error("[checkCommentValidity] No JSON found in LLM response:", text);
+      console.error(
+        "[checkCommentValidity] No JSON found in LLM response:",
+        text,
+      );
       return {
         history,
         validityResult: { is_valid: true, comment: undefined },
@@ -101,22 +123,34 @@ Based on the above information, is the user comment relevant and appropriate for
     console.log("validity result", result);
     return { history, validityResult: result };
   } catch (error) {
-    console.error("[checkCommentValidity] Failed to parse LLM response:", error);
+    console.error(
+      "[checkCommentValidity] Failed to parse LLM response:",
+      error,
+    );
     return { history, validityResult: { is_valid: true, comment: undefined } };
   }
 }
 
-async function checkProfanityAndSpamming(state: CommentState): Promise<Partial<CommentState>> {
+async function checkProfanityAndSpamming(
+  state: CommentState,
+): Promise<Partial<CommentState>> {
   const { commentBody } = state;
 
   const prompt = `User comment: """${commentBody}"""`;
 
   try {
-    const response = await aiClient(MODELS.CHEAP, prompt, ProfessionalitySystemPrompt);
+    const response = await aiClient(
+      MODELS.CHEAP,
+      prompt,
+      ProfessionalitySystemPrompt,
+    );
     const text = response.text.trim();
     const jsonMatch = text.match(/\{[\s\S]*\}/);
     if (!jsonMatch) {
-      console.error("[checkProfanityAndSpamming] No JSON found in LLM response:", text);
+      console.error(
+        "[checkProfanityAndSpamming] No JSON found in LLM response:",
+        text,
+      );
       return { profanityResult: { comment_needed: false, comment: undefined } };
     }
 
@@ -124,12 +158,17 @@ async function checkProfanityAndSpamming(state: CommentState): Promise<Partial<C
     console.log("Professionality result", result);
     return { profanityResult: result };
   } catch (error) {
-    console.error("[checkProfanityAndSpamming] Failed to parse LLM response:", error);
+    console.error(
+      "[checkProfanityAndSpamming] Failed to parse LLM response:",
+      error,
+    );
     return { profanityResult: { comment_needed: false, comment: undefined } };
   }
 }
 
-async function makeFinalDecision(state: CommentState): Promise<Partial<CommentState>> {
+async function makeFinalDecision(
+  state: CommentState,
+): Promise<Partial<CommentState>> {
   const { validityResult, profanityResult, commentBody } = state;
 
   const prompt = `User comment: """${commentBody}"""
@@ -153,7 +192,11 @@ Provide the final decision in the following JSON format:
 `;
 
   try {
-    const response = await aiClient(MODELS.STANDARD, prompt, ValiditySystemPrompt);
+    const response = await aiClient(
+      MODELS.STANDARD,
+      prompt,
+      ValiditySystemPrompt,
+    );
     const text = response.text.trim();
     const jsonMatch = text.match(/\{[\s\S]*\}/);
     if (!jsonMatch) {

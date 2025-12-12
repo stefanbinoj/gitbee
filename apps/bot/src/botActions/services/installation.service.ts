@@ -1,5 +1,5 @@
-import { db, installationSchema } from "@gitbee/db";
-import { eq } from "drizzle-orm";
+import { db, installationSchema, eq } from "@gitbee/db";
+
 import type { InstallationData } from "@/botActions/types";
 
 export async function findInstallationByTargetId(targetId: number) {
@@ -23,7 +23,7 @@ export async function createInstallation(data: InstallationData) {
 
 export async function reactivateInstallation(
   targetId: number,
-  data: InstallationData
+  data: InstallationData,
 ) {
   return db
     .update(installationSchema)

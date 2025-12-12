@@ -1,5 +1,5 @@
-import { db, installationRepositoriesSchema } from "@gitbee/db";
-import { eq } from "drizzle-orm";
+import { db, installationRepositoriesSchema, eq } from "@gitbee/db";
+
 import type { RepositoryData } from "@/botActions/types";
 
 export async function findRepositoryById(repositoryId: number) {
@@ -19,7 +19,7 @@ export async function createRepository(data: RepositoryData) {
 
 export async function reactivateRepository(
   repositoryId: number,
-  data: RepositoryData
+  data: RepositoryData,
 ) {
   return db
     .update(installationRepositoriesSchema)

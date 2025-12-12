@@ -1,5 +1,5 @@
-import { db, reportSchema } from "@gitbee/db";
-import { eq } from "drizzle-orm";
+import { db, reportSchema, eq } from "@gitbee/db";
+
 import type { ReportStatus, ReportType } from "@/botActions/types";
 
 interface CreateReportData {
@@ -30,7 +30,7 @@ export async function createReport(data: CreateReportData) {
 
 export async function updateReportStatus(
   reportId: number,
-  status: ReportStatus
+  status: ReportStatus,
 ) {
   return db
     .update(reportSchema)
