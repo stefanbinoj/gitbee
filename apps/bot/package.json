@@ -9,7 +9,7 @@
     "@elysiajs/cors": "^1.4.0",
     "@langchain/core": "^1.1.4",
     "@langchain/langgraph": "^1.0.4",
-    "drizzle-orm": "^0.45.0",
+    "drizzle-orm": "^0.45.1",
     "elysia": "latest",
     "tiktoken": "^1.0.22"
   },

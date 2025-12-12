@@ -9,6 +9,8 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@gitbee/db": "workspace:*",
+    "drizzle-orm": "^0.45.1",
     "@elysiajs/eden": "^1.4.5",
     "@hookform/resolvers": "^3.10.0",
     "@radix-ui/react-accordion": "1.2.2",

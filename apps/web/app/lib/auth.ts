@@ -1,7 +1,6 @@
 import { betterAuth } from "better-auth";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
-import { db, account as accountTable } from "@gitbee/db";
-import { eq, and } from "drizzle-orm";
+import { db, account as accountTable, eq, and } from "@gitbee/db";
 
 export const auth = betterAuth({
   database: drizzleAdapter(db, {
@@ -32,8 +31,8 @@ export const auth = betterAuth({
             .where(
               and(
                 eq(accountTable.userId, session.userId),
-                eq(accountTable.providerId, "github")
-              )
+                eq(accountTable.providerId, "github"),
+              ),
             )
             .limit(1);
 
