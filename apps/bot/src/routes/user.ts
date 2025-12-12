@@ -1,6 +1,13 @@
 import { Elysia, t } from "elysia";
-import { db, reportSchema, installationSchema } from "@gitbee/db";
-import { eq, and, inArray, desc } from "drizzle-orm";
+import {
+  db,
+  reportSchema,
+  installationSchema,
+  eq,
+  and,
+  inArray,
+  desc,
+} from "@gitbee/db";
 
 export const userRouter = new Elysia({ prefix: "/users" })
   .get(
