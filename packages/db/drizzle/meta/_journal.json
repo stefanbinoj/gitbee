@@ -22,6 +22,20 @@
       "when": 1765512574872,
       "tag": "0002_mean_power_pack",
       "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1765545853636,
+      "tag": "0004_marvelous_darkhawk",
+      "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1765546206698,
+      "tag": "0005_simple_martin_li",
+      "breakpoints": true
     }
   ]
 }

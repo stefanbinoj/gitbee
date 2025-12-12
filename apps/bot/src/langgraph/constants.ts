@@ -8,4 +8,10 @@ export const MODELS = {
   STANDARD: "moonshotai/kimi-k2-thinking",
 } as const;
 
+export interface finalDecisionResult {
+  final_action: "approve" | "comment";
+  final_comment: string;
+  shouldFlag: 0 | 1 | 2;
+}
+
 export type ModelName = (typeof MODELS)[keyof typeof MODELS];
