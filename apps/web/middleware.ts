@@ -1,14 +1,14 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 
-export async function proxy(request: NextRequest) {
+export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
   // Check if the route is a dashboard route
   if (pathname.startsWith("/dashboard")) {
     // Get the session token from cookies
     const sessionToken = request.cookies.get(
-      "better-auth.session_token"
+      "better-auth.session_token",
     )?.value;
     console.log("at dashboard", sessionToken);
 
@@ -23,7 +23,7 @@ export async function proxy(request: NextRequest) {
   // If on login page and already authenticated, redirect to dashboard
   if (pathname === "/login") {
     const sessionToken = request.cookies.get(
-      "better-auth.session_token"
+      "better-auth.session_token",
     )?.value;
     console.log("at login", sessionToken);
     if (sessionToken) {
