@@ -7,9 +7,13 @@ export async function middleware(request: NextRequest) {
   // Check if the route is a dashboard route
   if (pathname.startsWith("/dashboard")) {
     // Get the session token from cookies
-    const sessionToken = request.cookies.get(
-      "better-auth.session_token",
-    )?.value;
+    const cookies = request.cookies.getAll();
+    console.log("All cookies:", cookies.map((c) => c.name).join(", "));
+
+    const sessionToken =
+      request.cookies.get("better-auth.session_token")?.value ||
+      request.cookies.get("__Secure-better-auth.session_token")?.value;
+
     console.log("at dashboard", sessionToken);
 
     // If no session token, redirect to login
@@ -22,9 +26,9 @@ export async function middleware(request: NextRequest) {
 
   // If on login page and already authenticated, redirect to dashboard
   if (pathname === "/login") {
-    const sessionToken = request.cookies.get(
-      "better-auth.session_token",
-    )?.value;
+    const sessionToken =
+      request.cookies.get("better-auth.session_token")?.value ||
+      request.cookies.get("__Secure-better-auth.session_token")?.value;
     console.log("at login", sessionToken);
     if (sessionToken) {
       return NextResponse.redirect(new URL("/dashboard", request.url));
