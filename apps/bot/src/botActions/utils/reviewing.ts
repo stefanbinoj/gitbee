@@ -7,6 +7,7 @@ export interface SkippablePayload {
 }
 
 export function shouldSkipEvent(payload: SkippablePayload): boolean {
+  console.log("user association:", payload.author_association);
   if (payload.performed_via_github_app) {
     return true;
   }

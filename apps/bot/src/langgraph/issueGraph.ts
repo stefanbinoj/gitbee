@@ -36,7 +36,7 @@ const IssueStateAnnotation = Annotation.Root({
 type IssueState = typeof IssueStateAnnotation.State;
 
 async function checkIssueQuality(
-  state: IssueState,
+  _state: IssueState,
 ): Promise<Partial<IssueState>> {
   const qualityResult: IssueCheckResult = {
     isValid: true,
@@ -48,7 +48,7 @@ async function checkIssueQuality(
 }
 
 async function checkDuplicates(
-  state: IssueState,
+  _state: IssueState,
 ): Promise<Partial<IssueState>> {
   const duplicateResult: IssueCheckResult = {
     isValid: true,

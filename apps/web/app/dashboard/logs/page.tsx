@@ -1,10 +1,7 @@
 "use client";
 
-import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import {
-  Search,
   ChevronDown,
   ChevronLeft,
   ChevronRight,
@@ -12,125 +9,103 @@ import {
   AlertTriangle,
   Loader2,
   FileText,
+  ExternalLink,
 } from "lucide-react";
+import { useQuery } from "@tanstack/react-query";
 import { authClient, type Session } from "@/lib/authClient";
 import { api } from "@/lib/api";
 
-type Report = {
-  repositoryFullName: string | null;
-  id: number;
-  installationId: number;
-  repositoryId: number;
-  targetId: number;
-  reportType: "ingestion" | "comment_analysis" | "pr_analysis";
-  status: "in_progress" | "completed" | "failed";
-  createdAt: string;
-  updatedAt: string;
-  completedAt: string | null;
+const getStatusColor = (status: string) => {
+  switch (status) {
+    case "completed":
+      return "text-green-500 bg-green-500/10 border-green-500/20";
+    case "failed":
+      return "text-red-500 bg-red-500/10 border-red-500/20";
+    case "in_progress":
+      return "text-amber-500 bg-amber-500/10 border-amber-500/20";
+    default:
+      return "text-neutral-400 bg-neutral-500/10 border-neutral-500/20";
+  }
 };
 
-type LogEntry = {
-  id: string;
-  title: string;
-  type: string;
-  repository: string;
-  branch: string;
-  date: string;
-  status: string;
-  timeTaken: string | null;
+const getStatusLabel = (status: string) => {
+  switch (status) {
+    case "completed":
+      return "Success";
+    case "failed":
+      return "Failed";
+    case "in_progress":
+      return "In Progress";
+    default:
+      return status;
+  }
+};
+
+const getReportTypeLabel = (type: string) => {
+  switch (type) {
+    case "ingestion":
+      return "Ingestion";
+    case "comment_analysis":
+      return "Comment Analysis";
+    case "pr_analysis":
+      return "PR Analysis";
+    default:
+      return type;
+  }
 };
 
 export default function LogsPage() {
-  const [reports, setReports] = useState<Report[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-
-  const { data: session } = authClient.useSession() as { data: Session | null };
-
-  useEffect(() => {
-    const fetchReports = async () => {
-      if (!session?.session?.githubAccountId) {
-        setLoading(false);
-        return;
-      }
-
-      try {
-        const response = await api.api.users
-          .reports({
-            githubAccountId: session.session.githubAccountId.toString(),
-          })
-          .get();
-        if (response.data && response.data.reports) {
-          // Convert Date objects to strings for our Report type
-          const formattedReports = response.data.reports.map((report: any) => ({
-            ...report,
-            createdAt: report.createdAt.toISOString(),
-            updatedAt: report.updatedAt.toISOString(),
-            completedAt: report.completedAt?.toISOString() || null,
-          }));
-          setReports(formattedReports);
-        } else {
-          setError("Failed to fetch reports");
-        }
-      } catch (err) {
-        setError("Failed to fetch reports");
-        console.error("Error fetching reports:", err);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchReports();
-  }, [session]);
-
-  const formatDuration = (start: string, end: string | null) => {
-    if (!end) return null;
-    const startDate = new Date(start);
-    const endDate = new Date(end);
-    const diff = endDate.getTime() - startDate.getTime();
-    const seconds = Math.floor(diff / 1000);
-    if (seconds < 60) return `${seconds}s`;
-    const minutes = Math.floor(seconds / 60);
-    return `${minutes}m ${seconds % 60}s`;
+  const { data: session } = authClient.useSession() as {
+    data: Session | null;
   };
 
-  const logs: LogEntry[] = reports.map((report: Report) => {
-    const isIngestion = report.reportType === "ingestion";
-    let title = `${report.reportType.replace("_", " ").toUpperCase()} #${report.id}`;
-    if (isIngestion) title = "Ingestion";
+  const {
+    data: reports = [],
+    isLoading,
+    error,
+  } = useQuery({
+    queryKey: ["reports", session?.session?.githubAccountId],
+    queryFn: async () => {
+      if (!session?.session?.githubAccountId) {
+        return [];
+      }
+
+      const response = await api.api.users
+        .reports({
+          githubAccountId: session.session.githubAccountId.toString(),
+        })
+        .get();
+
+      return response.data?.reports || [];
+    },
+    enabled: !!session?.session?.githubAccountId,
+  });
+
+  const logs = reports.map((report) => {
+    const createdDate = new Date(report.createdAt);
+    const month = createdDate.toLocaleString("default", { month: "short" });
+    const day = createdDate.getDate();
+    const hours = createdDate.getHours().toString().padStart(2, "0");
+    const minutes = createdDate.getMinutes().toString().padStart(2, "0");
 
     return {
       id: report.id.toString(),
-      title,
+      title: getReportTypeLabel(report.reportType),
       type: report.reportType,
       repository: report.repositoryFullName || "Unknown",
-      branch: "main", // Placeholder as branch info is not available in Report
-      date:
-        new Date(report.createdAt).toLocaleDateString() +
-        " " +
-        new Date(report.createdAt).toLocaleTimeString(),
+      branch: "main",
+      date: `${day} ${month} ${hours}:${minutes}`,
+      url: report.url || null,
       status: report.status,
-      timeTaken: formatDuration(report.createdAt, report.completedAt),
+      statusLabel: getStatusLabel(report.status),
+      timeTaken: report.completedAt
+        ? new Date(report.completedAt).getTime() -
+          new Date(report.createdAt).getTime()
+        : null,
     };
   });
 
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case "completed":
-      case "success":
-        return "text-green-500 bg-green-500/10 border-green-500/20";
-      case "failed":
-      case "error":
-        return "text-red-500 bg-red-500/10 border-red-500/20";
-      case "in_progress":
-      case "warning":
-        return "text-amber-500 bg-amber-500/10 border-amber-500/20";
-      default:
-        return "text-neutral-400 bg-neutral-500/10 border-neutral-500/20";
-    }
-  };
-
-  if (loading) {
+  if (isLoading) {
     return (
       <div className="flex items-center justify-center h-64">
         <Loader2 className="w-8 h-8 animate-spin text-yellow-500" />
@@ -144,7 +119,7 @@ export default function LogsPage() {
       <div className="flex items-center justify-center h-64">
         <div className="text-center">
           <AlertTriangle className="w-12 h-12 text-red-500 mx-auto mb-4" />
-          <p className="text-red-400">{error}</p>
+          <p className="text-red-400">Failed to fetch reports</p>
         </div>
       </div>
     );
@@ -167,24 +142,6 @@ export default function LogsPage() {
           </div>
         </div>
 
-        {/* Search and Filter Bar */}
-        <div className="flex items-center justify-between gap-4 mb-6">
-          <div className="relative flex-1 max-w-md">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-neutral-500" />
-            <Input
-              placeholder="Search repository, title, or PR number"
-              className="pl-9 bg-neutral-900 border-neutral-800 text-neutral-300 placeholder:text-neutral-600 focus-visible:ring-1 focus-visible:ring-neutral-700 h-9"
-            />
-          </div>
-          <Button
-            variant="outline"
-            className="bg-neutral-900 border-neutral-800 text-neutral-300 hover:bg-neutral-800 hover:text-white h-9 gap-2 text-sm font-normal"
-          >
-            Status: All
-            <ChevronDown className="w-3.5 h-3.5 opacity-70" />
-          </Button>
-        </div>
-
         {/* Table Section */}
         <div className="border border-neutral-800 rounded-md bg-neutral-900/50 overflow-hidden">
           {/* Table Header */}
@@ -194,7 +151,8 @@ export default function LogsPage() {
             <div className="col-span-3">Repository</div>
             <div className="col-span-2">Branch</div>
             <div className="col-span-1">Status</div>
-            <div className="col-span-2 text-right">Last Updated</div>
+            <div className="col-span-1">Date</div>
+            <div className="col-span-1 text-center">URL</div>
           </div>
 
           {/* Table Body */}
@@ -204,13 +162,13 @@ export default function LogsPage() {
                 <p>No relevant logs found</p>
               </div>
             ) : (
-              logs.map((log) => (
+              logs.map((log, idx) => (
                 <div
                   key={log.id}
                   className="grid grid-cols-12 gap-4 px-4 py-3 items-center text-sm hover:bg-neutral-800/30 transition-colors"
                 >
                   <div className="col-span-1 text-neutral-500 font-mono text-xs">
-                    {log.id}
+                    {idx + 1}
                   </div>
                   <div className="col-span-3 font-medium text-neutral-300 truncate">
                     {log.title}
@@ -228,11 +186,23 @@ export default function LogsPage() {
                         log.status,
                       )}`}
                     >
-                      {log.status === "completed" ? "success" : log.status}
+                      {log.statusLabel}
                     </span>
                   </div>
-                  <div className="col-span-2 text-right text-neutral-500 text-xs font-mono">
+                  <div className="col-span-1 text-neutral-500 text-xs font-mono">
                     {log.date}
+                  </div>
+                  <div className="col-span-1 flex justify-center">
+                    {log.url && (
+                      <a
+                        href={log.url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-blue-400 hover:text-blue-300 transition-colors"
+                      >
+                        <ExternalLink className="w-4 h-4" />
+                      </a>
+                    )}
                   </div>
                 </div>
               ))

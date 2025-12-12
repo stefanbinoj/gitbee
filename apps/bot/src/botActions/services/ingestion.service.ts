@@ -130,6 +130,7 @@ export async function ingestRepositoryWithReport(
   const report = await reportService.createReport({
     installationId,
     repositoryId,
+    repositoryFullName: `${owner}/${repo}`,
     targetId,
     reportType: "ingestion",
   });

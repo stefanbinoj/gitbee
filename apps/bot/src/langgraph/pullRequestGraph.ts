@@ -58,7 +58,7 @@ async function checkPRQuality(
 }
 
 async function checkGuidelines(
-  state: PullRequestState,
+  _state: PullRequestState,
 ): Promise<Partial<PullRequestState>> {
   const guidelinesResult: PRCheckResult = {
     isValid: true,

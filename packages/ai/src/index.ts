@@ -26,7 +26,6 @@ export async function aiClient(
   model: string,
   prompt: string,
   systemPrompt: string,
-  outputSchema: any,
   messages: ModelMessage[] = [],
 ) {
   const response = await generateText({
@@ -36,7 +35,6 @@ export async function aiClient(
       ...messages,
       { role: "user", content: prompt },
     ],
-    output: outputSchema,
     experimental_telemetry: { isEnabled: true },
   });
 

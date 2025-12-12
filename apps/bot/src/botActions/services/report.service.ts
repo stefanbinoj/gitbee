@@ -5,8 +5,10 @@ import type { ReportStatus, ReportType } from "@/botActions/types";
 interface CreateReportData {
   installationId: number;
   repositoryId: number;
+  repositoryFullName: string;
   targetId: number;
   reportType: ReportType;
+  url?: string;
 }
 
 export async function createReport(data: CreateReportData) {
@@ -15,9 +17,11 @@ export async function createReport(data: CreateReportData) {
     .values({
       installationId: data.installationId,
       repositoryId: data.repositoryId,
+      repositoryFullName: data.repositoryFullName,
       targetId: data.targetId,
       reportType: data.reportType,
       status: "in_progress",
+      url: data.url,
     })
     .returning({ id: reportSchema.id });
 

@@ -15,6 +15,13 @@
       "when": 1765453206335,
       "tag": "0001_fancy_dragon_man",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1765512574872,
+      "tag": "0002_mean_power_pack",
+      "breakpoints": true
     }
   ]
 }

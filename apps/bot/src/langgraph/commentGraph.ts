@@ -1,18 +1,30 @@
 import { StateGraph, START, END, Annotation } from "@langchain/langgraph";
 import { type Octokit } from "@gitbee/octokit";
+import { searchSimilar } from "@gitbee/vector-db";
+import { aiClient, embedTexts } from "@gitbee/ai";
+import { ProfessionalitySystemPrompt } from "./systemPrompt/professionalism";
+import { ValiditySystemPrompt } from "./systemPrompt/validity";
+import { MODELS } from "./constants";
 
-export interface CommentCheckResult {
-  isValid: boolean;
-  reason?: string;
-  confidence: number;
+interface CommentCheckResult {
+  is_valid: boolean; // handle false
+  comment?: string;
+}
+
+interface profinaityResult {
+  comment_needed: boolean; // handle true
+  comment?: string;
+}
+
+interface finalDecisionResult {
+  final_action: "approve" | "comment";
+  final_comment: string;
+  shouldFlag: 0 | 1 | 2;
 }
 
 const CommentStateAnnotation = Annotation.Root({
   // Input context
-  authorAssociation: Annotation<string>,
-  installationId: Annotation<number>,
   commentBody: Annotation<string>,
-  senderLogin: Annotation<string>,
   issueTitle: Annotation<string>,
   issueBody: Annotation<string>,
   owner: Annotation<string>,
@@ -24,46 +36,27 @@ const CommentStateAnnotation = Annotation.Root({
   history: Annotation<string | undefined>,
 
   // Check results
+  //profanityResult
+  profanityResult: Annotation<profinaityResult | undefined>,
   validityResult: Annotation<CommentCheckResult | undefined>,
-  profanityResult: Annotation<CommentCheckResult | undefined>,
 
   // Final decision
-  finalDecision: Annotation<
-    | {
-        shouldFlag: boolean;
-        reason: string;
-        action: "none" | "warn" | "hide" | "report";
-      }
-    | undefined
-  >,
+  finalDecision: Annotation<finalDecisionResult | undefined>,
 });
 
 type CommentState = typeof CommentStateAnnotation.State;
 
-async function checkCommentValidity(
-  state: CommentState,
-): Promise<Partial<CommentState>> {
-  const {
+async function checkCommentValidity(state: CommentState): Promise<Partial<CommentState>> {
+  const { owner, repo, issueNumber, octokit, commentBody, issueTitle, issueBody } = state;
+
+  const response = await octokit.request("GET /repos/{owner}/{repo}/issues/{issue_number}/comments", {
     owner,
     repo,
-    issueNumber,
-    octokit,
-    commentBody,
-    issueTitle,
-    issueBody,
-  } = state;
-
-  const response = await octokit.request(
-    "GET /repos/{owner}/{repo}/issues/{issue_number}/comments",
-    {
-      owner,
-      repo,
-      issue_number: issueNumber,
-      per_page: 20,
-      sort: "created",
-      direction: "asc",
-    },
-  );
+    issue_number: issueNumber,
+    per_page: 20,
+    sort: "created",
+    direction: "asc",
+  });
 
   let history: string | undefined;
 
@@ -80,79 +73,113 @@ async function checkCommentValidity(
     history = `Previous comments in this thread:\n\n${commentThread}`;
   }
 
-  // TODO: Add RAG search for repository context
-  // TODO: Call LLM to validate comment relevance
-  // For now, return a placeholder result
-  const validityResult: CommentCheckResult = {
-    isValid: true,
-    confidence: 0.8,
-    reason: "Comment appears relevant to the issue",
-  };
+  const queryVector = await embedTexts([commentBody]);
+  const vectorSearch = await searchSimilar(queryVector[0], owner, repo, 2);
+  console.log(`[CommentGraph] Retrieved ${vectorSearch.length} similar chunks for validity check`);
 
-  return { history, validityResult };
-}
+  const prompt = `Issue Title: """${issueTitle}"""
+Issue Body: """${issueBody}"""
+User Comment: """${commentBody}"""
+Relevant Context from Repository: """${vectorSearch.map((chunk) => chunk.text).join("\n\n---\n\n")}"""
+${history ? `Comment History: """${history}"""` : ""}
 
-/**
- * Checks for profanity, spam, and low-quality content
- */
-async function checkProfanityAndSpamming(
-  state: CommentState,
-): Promise<Partial<CommentState>> {
-  const { commentBody, senderLogin } = state;
+Based on the above information, is the user comment relevant and appropriate for the issue? Provide a detailed analysis.`;
 
-  // TODO: Implement profanity detection
-  // TODO: Check for spam patterns (repeated content, excessive links, etc.)
-  // TODO: Detect self-assignment requests
-  // TODO: Call LLM for nuanced detection
+  try {
+    const llmResponse = await aiClient(MODELS.CHEAP, prompt, ValiditySystemPrompt);
+    const text = llmResponse.text.trim();
+    const jsonMatch = text.match(/\{[\s\S]*\}/);
+    if (!jsonMatch) {
+      console.error("[checkCommentValidity] No JSON found in LLM response:", text);
+      return {
+        history,
+        validityResult: { is_valid: true, comment: undefined },
+      };
+    }
 
-  const profanityResult: CommentCheckResult = {
-    isValid: true,
-    confidence: 0.9,
-    reason: "No profanity or spam detected",
-  };
-
-  return { profanityResult };
-}
-
-async function makeFinalDecision(
-  state: CommentState,
-): Promise<Partial<CommentState>> {
-  const { validityResult, profanityResult, commentBody, senderLogin } = state;
-
-  // Default to safe values if checks didn't run
-  const validity = validityResult ?? { isValid: true, confidence: 0.5 };
-  const profanity = profanityResult ?? { isValid: true, confidence: 0.5 };
-
-  // Determine if comment should be flagged
-  const shouldFlag = !validity.isValid || !profanity.isValid;
-
-  // Determine appropriate action
-  let action: "none" | "warn" | "hide" | "report" = "none";
-  let reason = "Comment passed all checks";
-
-  if (!profanity.isValid) {
-    action = profanity.confidence > 0.9 ? "hide" : "warn";
-    reason = profanity.reason ?? "Profanity or spam detected";
-  } else if (!validity.isValid) {
-    action = "warn";
-    reason = validity.reason ?? "Comment may not be relevant";
+    const result = JSON.parse(jsonMatch[0]) as CommentCheckResult;
+    console.log("validity result", result);
+    return { history, validityResult: result };
+  } catch (error) {
+    console.error("[checkCommentValidity] Failed to parse LLM response:", error);
+    return { history, validityResult: { is_valid: true, comment: undefined } };
   }
+}
 
-  // TODO: Call LLM to make nuanced final decision
-  // combining both check results with full context
+async function checkProfanityAndSpamming(state: CommentState): Promise<Partial<CommentState>> {
+  const { commentBody } = state;
 
-  const finalDecision = {
-    shouldFlag,
-    reason,
-    action,
-  };
+  const prompt = `User comment: """${commentBody}"""`;
 
-  console.log(
-    `[CommentGraph] Final decision for @${senderLogin}:`,
-    finalDecision,
-  );
+  try {
+    const response = await aiClient(MODELS.CHEAP, prompt, ProfessionalitySystemPrompt);
+    const text = response.text.trim();
+    const jsonMatch = text.match(/\{[\s\S]*\}/);
+    if (!jsonMatch) {
+      console.error("[checkProfanityAndSpamming] No JSON found in LLM response:", text);
+      return { profanityResult: { comment_needed: false, comment: undefined } };
+    }
 
-  return { finalDecision };
+    const result = JSON.parse(jsonMatch[0]) as profinaityResult;
+    console.log("Professionality result", result);
+    return { profanityResult: result };
+  } catch (error) {
+    console.error("[checkProfanityAndSpamming] Failed to parse LLM response:", error);
+    return { profanityResult: { comment_needed: false, comment: undefined } };
+  }
+}
+
+async function makeFinalDecision(state: CommentState): Promise<Partial<CommentState>> {
+  const { validityResult, profanityResult, commentBody } = state;
+
+  const prompt = `User comment: """${commentBody}"""
+Validity Check Result: ${JSON.stringify(validityResult)}
+Profanity/Spamming Check Result: ${JSON.stringify(profanityResult)}
+
+Based on the above results, determine the final action to take regarding the user comment. Follow these rules:
+
+1. If neither check flags an issue, set final_action to "approve", final_comment to an empty string, and shouldFlag to 0.
+2. If one or both checks flag issues, set final_action to "comment", and construct final_comment using the explanations from the flagged checks. If both checks flag issues, merge the messages concisely (1-3 sentences) without redundancy.
+3. Set shouldFlag based on severity:
+   - 0 = No issues found
+   - 1 = Mild issue (e.g., slight unprofessional tone OR mildly invalid comment)
+   - 2 = Extreme issue (e.g., both checks flag major problems, or severe incoherence, harassment, toxicity, or clearly unusable content)
+Provide the final decision in the following JSON format:
+{
+  "final_action": "approve" | "comment",
+  "final_comment": string,
+  "shouldFlag": 0 | 1 | 2
+}
+`;
+
+  try {
+    const response = await aiClient(MODELS.STANDARD, prompt, ValiditySystemPrompt);
+    const text = response.text.trim();
+    const jsonMatch = text.match(/\{[\s\S]*\}/);
+    if (!jsonMatch) {
+      console.error("[makeFinalDecision] No JSON found in LLM response:", text);
+      return {
+        finalDecision: {
+          final_action: "approve",
+          final_comment: "",
+          shouldFlag: 0,
+        },
+      };
+    }
+
+    const result = JSON.parse(jsonMatch[0]) as finalDecisionResult;
+    console.log("Final Decision", result);
+    return { finalDecision: result };
+  } catch (error) {
+    console.error("[makeFinalDecision] Failed to parse LLM response:", error);
+    return {
+      finalDecision: {
+        final_action: "approve",
+        final_comment: "",
+        shouldFlag: 0,
+      },
+    };
+  }
 }
 
 // --- Graph Definition ---

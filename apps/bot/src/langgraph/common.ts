@@ -1,4 +1,5 @@
 import { aiClient } from "@gitbee/ai";
+import { MODELS } from "./constants";
 
 // Types
 interface GitHubUser {
@@ -57,7 +58,7 @@ async function fetchGitHubRepos(username: string): Promise<GitHubRepo[]> {
     `https://api.github.com/users/${username}/repos?per_page=100&sort=updated`,
     {
       headers: { Accept: "application/vnd.github.v3+json" },
-    },
+    }
   );
   if (!res.ok) throw new Error(`GitHub API error: ${res.status}`);
   return res.json();
@@ -82,7 +83,7 @@ function calculateMetrics(user: GitHubUser, repos: GitHubRepo[]): UserMetrics {
 }
 
 export async function analyzeUserExperience(
-  username: string,
+  username: string
 ): Promise<ExperienceResult> {
   // Fetch GitHub data in parallel
   const [user, repos] = await Promise.all([
@@ -103,12 +104,7 @@ export async function analyzeUserExperience(
 - Following: ${metrics.following}`;
 
   // Pass undefined for outputSchema to avoid AI SDK output parsing issues
-  const response = await aiClient(
-    "openai/gpt-4o-mini",
-    prompt,
-    SYSTEM_PROMPT,
-    undefined,
-  );
+  const response = await aiClient(MODELS.CHEAP, prompt, SYSTEM_PROMPT);
 
   // Parse JSON from text response
   const text = response.text.trim();
@@ -131,4 +127,3 @@ export async function analyzeUserExperience(
     metrics,
   };
 }
-

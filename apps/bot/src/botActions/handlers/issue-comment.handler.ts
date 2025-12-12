@@ -2,6 +2,8 @@ import { commentGraph } from "@/langgraph/commentGraph";
 import { app, type Octokit } from "@gitbee/octokit";
 import { shouldSkipEvent } from "@/botActions/utils";
 
+import { createReport, updateReportStatus } from "../services/report.service";
+
 function extractCommentContext(payload: any, octokit: any) {
   return {
     authorAssociation: payload.comment.author_association,
@@ -25,14 +27,49 @@ async function handleComment(payload: any, octokit: Octokit, action: string) {
     return;
   }
 
+  // TODO : check if assigning comment
+
   const context = extractCommentContext(payload, octokit);
   const compiledGraph = commentGraph.compile();
 
+  let reportId: number | undefined;
   try {
+    const report = await createReport({
+      installationId: context.installationId,
+      repositoryId: payload.repository.id,
+      repositoryFullName: payload.repository.full_name,
+      targetId: payload.installation.id,
+      reportType: "comment_analysis",
+      url: payload.comment.html_url,
+    });
+    reportId = report.id;
+
     const result = await compiledGraph.invoke(context);
-    console.log("[IssueComment] Graph result:", result);
+    const finalDecision = result.finalDecision;
+    if (finalDecision?.final_action === "comment") {
+      let body = finalDecision.final_comment;
+      if (finalDecision.shouldFlag === 1) {
+        body +=
+          "\n \n⚠️ **This comment has been flagged for review by the moderation system.**";
+      } else if (finalDecision.shouldFlag === 2) {
+        body +=
+          "\n \n🚨 **This comment has been automatically flagged and will be reviewed by the moderation team.**";
+      }
+      await octokit.rest.issues.createComment({
+        owner: context.owner,
+        repo: context.repo,
+        issue_number: context.issueNumber,
+        body: body,
+      });
+    } else if (finalDecision?.final_action === "approve") {
+      console.log("[IssueComment] Comment approved, no action taken.");
+    }
+    updateReportStatus(report.id, "completed");
   } catch (error) {
     console.error("[IssueComment] Graph execution failed:", error);
+    if (reportId !== undefined) {
+      updateReportStatus(reportId, "failed");
+    }
   }
 }
 

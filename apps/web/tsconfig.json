@@ -26,7 +26,7 @@
       "@gitbee/ai": ["../../packages/ai/src"],
       "@gitbee/octokit": ["../../packages/octokit/src"],
       "@gitbee/vector-db": ["../../packages/vector-db/src"],
-      "@gitbee/bot": ["../bot/src"]
+      "@gitbee/bot": ["../bot/src/types.ts"]
     }
   },
   "include": [
