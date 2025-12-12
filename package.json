@@ -6,10 +6,11 @@
     "dev": "turbo run dev",
     "lint": "turbo run lint",
     "format": "prettier --write \"**/*.{ts,tsx,md}\"",
-    "check-types": "turbo run check-types" ,
+    "check-types": "turbo run check-types",
     "bot:dev": "cd apps/bot && bun dev",
-    "web:dev": "cd apps/web && bun dev"
-
+    "web:dev": "cd apps/web && bun dev",
+    "web:build": "cd apps/web && bun run build",
+    "bot:build": "cd apps/bot && bun run build"
   },
   "devDependencies": {
     "prettier": "^3.6.2",
@@ -20,5 +21,8 @@
     "node": ">=18"
   },
   "packageManager": "bun@1.2.19",
-  "workspaces": ["apps/*", "packages/*"]
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ]
 }
