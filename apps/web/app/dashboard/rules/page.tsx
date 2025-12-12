@@ -40,7 +40,7 @@ Bad: print("Error message.")`,
   ]);
 
   return (
-    <div className="h-[calc(100vh-8rem)] flex flex-col gap-6">
+    <div className="h-full md:h-[calc(100vh-8rem)] flex flex-col gap-6">
       <Card className="flex-1 bg-neutral-900 border-neutral-700 flex flex-col overflow-hidden">
         <CardHeader className="border-b border-neutral-800 pb-4">
           <div className="flex items-center justify-between">
@@ -60,9 +60,9 @@ Bad: print("Error message.")`,
           </div>
         </CardHeader>
 
-        <div className="flex flex-1 overflow-hidden">
+        <div className="flex flex-col md:flex-row flex-1 overflow-hidden">
           {/* Sidebar - List of Rules */}
-          <div className="w-64 border-r border-neutral-800 flex flex-col bg-neutral-900">
+          <div className="w-full md:w-64 border-b md:border-b-0 md:border-r border-neutral-800 flex flex-col bg-neutral-900">
             <div className="p-4 border-b border-neutral-800">
               <Button
                 variant="ghost"
@@ -73,7 +73,7 @@ Bad: print("Error message.")`,
                 New Rule
               </Button>
             </div>
-            <div className="flex-1 overflow-y-auto p-2 space-y-1 [&::-webkit-scrollbar]:w-2 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:bg-neutral-800 [&::-webkit-scrollbar-thumb]:rounded-full">
+            <div className="flex-1 overflow-y-auto p-2 space-y-1 max-h-40 md:max-h-none [&::-webkit-scrollbar]:w-2 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:bg-neutral-800 [&::-webkit-scrollbar-thumb]:rounded-full">
               {rules.map((rule) => (
                 <button
                   key={rule.id}
@@ -187,21 +187,21 @@ Bad: print("Error message.")`,
             </div>
 
             {/* Footer Actions */}
-            <div className="p-4 border-t border-neutral-800 bg-neutral-900 flex justify-between items-center">
+            <div className="p-4 border-t border-neutral-800 bg-neutral-900 flex flex-col sm:flex-row justify-between items-center gap-3">
               <Button
                 variant="ghost"
-                className="text-neutral-400 hover:text-white hover:bg-neutral-800"
+                className="w-full sm:w-auto text-neutral-400 hover:text-white hover:bg-neutral-800"
               >
                 Back
               </Button>
-              <div className="flex gap-3">
+              <div className="flex gap-3 w-full sm:w-auto">
                 <Button
                   variant="ghost"
-                  className="text-neutral-400 hover:text-white hover:bg-neutral-800"
+                  className="flex-1 sm:flex-none text-neutral-400 hover:text-white hover:bg-neutral-800"
                 >
                   Skip
                 </Button>
-                <Button className="bg-yellow-500 hover:bg-yellow-600 text-neutral-900 font-semibold min-w-[140px]">
+                <Button className="flex-1 sm:flex-none bg-yellow-500 hover:bg-yellow-600 text-neutral-900 font-semibold sm:min-w-[140px]">
                   Save and Continue
                 </Button>
               </div>

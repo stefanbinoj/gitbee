@@ -136,7 +136,7 @@ export default function SettingsPage() {
                 </p>
               </div>
             </Label>
-            <div className="flex gap-2 ml-7">
+            <div className="flex flex-wrap gap-2 ml-0 sm:ml-7">
               <Button
                 variant="outline"
                 className="border-yellow-500 bg-yellow-500/10 text-yellow-500 hover:bg-yellow-500/20"

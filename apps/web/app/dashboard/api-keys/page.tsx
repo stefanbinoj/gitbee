@@ -32,7 +32,7 @@ export default function ApiKeysPage() {
     <div className="space-y-6">
       <Card className="bg-neutral-900 border-neutral-700">
         <CardHeader>
-          <div className="flex items-center justify-between">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <div className="flex items-center gap-3">
               <div className="p-2 bg-yellow-500/10 rounded-full">
                 <Key className="w-5 h-5 text-yellow-500" />
@@ -92,7 +92,8 @@ export default function ApiKeysPage() {
           </div>
 
           <div className="border border-neutral-800 rounded-lg overflow-hidden bg-black">
-            <div className="grid grid-cols-12 gap-4 p-4 text-sm text-neutral-400 border-b border-neutral-800">
+            {/* Desktop Table Header */}
+            <div className="hidden sm:grid grid-cols-12 gap-4 p-4 text-sm text-neutral-400 border-b border-neutral-800">
               <div className="col-span-6">Key</div>
               <div className="col-span-3 text-right">Usage</div>
               <div className="col-span-3 text-right pr-8">Limit</div>
@@ -101,31 +102,71 @@ export default function ApiKeysPage() {
             {apiKeys.map((item, index) => (
               <div
                 key={index}
-                className="grid grid-cols-12 gap-4 p-4 text-sm border-b last:border-0 border-neutral-800 items-center hover:bg-neutral-900/50 transition-colors"
+                className="p-4 text-sm border-b last:border-0 border-neutral-800 hover:bg-neutral-900/50 transition-colors"
               >
-                <div className="col-span-6">
-                  <div className="font-medium text-white mb-1">{item.name}</div>
-                  <div className="text-neutral-500 font-mono text-xs">
-                    {item.key}
-                  </div>
-                </div>
-                <div className="col-span-3 text-right text-neutral-300 font-mono">
-                  {item.usage}
-                </div>
-                <div className="col-span-3 flex items-center justify-end gap-4">
-                  <div className="flex items-center gap-2 w-full justify-end">
-                    <span className="text-neutral-300 font-mono">
-                      {item.limit}
-                    </span>
-                    <span className="text-[10px] border border-neutral-700 rounded px-1 py-0.5 text-neutral-400 uppercase tracking-wide">
-                      Total
-                    </span>
-                  </div>
-                  <div className="w-8 flex justify-center">
+                {/* Mobile Layout */}
+                <div className="sm:hidden space-y-3">
+                  <div className="flex items-start justify-between">
+                    <div>
+                      <div className="font-medium text-white mb-1">
+                        {item.name}
+                      </div>
+                      <div className="text-neutral-500 font-mono text-xs">
+                        {item.key}
+                      </div>
+                    </div>
                     <div className="flex flex-col gap-0.5 cursor-pointer p-1 hover:bg-neutral-800 rounded">
                       <div className="w-0.5 h-0.5 bg-neutral-500 rounded-full" />
                       <div className="w-0.5 h-0.5 bg-neutral-500 rounded-full" />
                       <div className="w-0.5 h-0.5 bg-neutral-500 rounded-full" />
+                    </div>
+                  </div>
+                  <div className="flex items-center justify-between text-sm">
+                    <div className="flex items-center gap-2">
+                      <span className="text-neutral-500">Usage:</span>
+                      <span className="text-neutral-300 font-mono">
+                        {item.usage}
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <span className="text-neutral-300 font-mono">
+                        {item.limit}
+                      </span>
+                      <span className="text-[10px] border border-neutral-700 rounded px-1 py-0.5 text-neutral-400 uppercase tracking-wide">
+                        Total
+                      </span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Desktop Layout */}
+                <div className="hidden sm:grid grid-cols-12 gap-4 items-center">
+                  <div className="col-span-6">
+                    <div className="font-medium text-white mb-1">
+                      {item.name}
+                    </div>
+                    <div className="text-neutral-500 font-mono text-xs">
+                      {item.key}
+                    </div>
+                  </div>
+                  <div className="col-span-3 text-right text-neutral-300 font-mono">
+                    {item.usage}
+                  </div>
+                  <div className="col-span-3 flex items-center justify-end gap-4">
+                    <div className="flex items-center gap-2 w-full justify-end">
+                      <span className="text-neutral-300 font-mono">
+                        {item.limit}
+                      </span>
+                      <span className="text-[10px] border border-neutral-700 rounded px-1 py-0.5 text-neutral-400 uppercase tracking-wide">
+                        Total
+                      </span>
+                    </div>
+                    <div className="w-8 flex justify-center">
+                      <div className="flex flex-col gap-0.5 cursor-pointer p-1 hover:bg-neutral-800 rounded">
+                        <div className="w-0.5 h-0.5 bg-neutral-500 rounded-full" />
+                        <div className="w-0.5 h-0.5 bg-neutral-500 rounded-full" />
+                        <div className="w-0.5 h-0.5 bg-neutral-500 rounded-full" />
+                      </div>
                     </div>
                   </div>
                 </div>

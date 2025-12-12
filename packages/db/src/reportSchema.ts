@@ -12,6 +12,7 @@ const reportTypeEnum = pgEnum("report_type", [
   "ingestion",
   "comment_analysis",
   "pr_analysis",
+  "issue_analysis",
 ]);
 const reportStatusEnum = pgEnum("report_status", [
   "in_progress",

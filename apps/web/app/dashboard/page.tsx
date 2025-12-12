@@ -139,11 +139,11 @@ export default function DashboardPage() {
       </div>
 
       {/* Charts Row */}
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-7">
+      <div className="grid gap-4 grid-cols-1 lg:grid-cols-7">
         {/* Weekly Activity Chart */}
-        <Card className="col-span-4 bg-neutral-900 border-neutral-700">
+        <Card className="lg:col-span-4 bg-neutral-900 border-neutral-700">
           <CardHeader>
-            <div className="flex items-center justify-between">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
               <CardTitle className="text-sm font-medium text-neutral-300 tracking-wider">
                 WEEKLY ACTIVITY
               </CardTitle>
@@ -188,7 +188,7 @@ export default function DashboardPage() {
         </Card>
 
         {/* Response Rate Chart */}
-        <Card className="col-span-3 bg-neutral-900 border-neutral-700">
+        <Card className="lg:col-span-3 bg-neutral-900 border-neutral-700">
           <CardHeader>
             <CardTitle className="text-sm font-medium text-neutral-300 tracking-wider">
               RESPONSE RATE
@@ -257,7 +257,7 @@ export default function DashboardPage() {
       </div>
 
       {/* Bottom Row */}
-      <div className="grid gap-4 md:grid-cols-2">
+      <div className="grid gap-4 grid-cols-1 md:grid-cols-2">
         {/* Recent Activity */}
         <Card className="bg-neutral-900 border-neutral-700 flex flex-col">
           <CardHeader className="border-b border-neutral-800 pb-4">

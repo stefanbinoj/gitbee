@@ -174,7 +174,41 @@ export default function BillingPage() {
           </div>
         </CardHeader>
         <CardContent>
-          <div className="overflow-x-auto">
+          {/* Mobile Card Layout */}
+          <div className="sm:hidden space-y-3 border-b border-neutral-600">
+            {invoices.map((invoice) => (
+              <div
+                key={invoice.id}
+                className="bg-neutral-800/50 rounded-lg p-4 space-y-3"
+              >
+                <div className="flex items-center justify-between">
+                  <span className="text-sm text-white font-mono">
+                    {invoice.id}
+                  </span>
+                  <span className="text-xs px-2 py-1 rounded bg-green-500/20 text-green-500 uppercase tracking-wider">
+                    {invoice.status}
+                  </span>
+                </div>
+                <div className="flex items-center justify-between text-sm">
+                  <span className="text-neutral-400">{invoice.date}</span>
+                  <span className="text-white font-mono">{invoice.amount}</span>
+                </div>
+                <div className="flex justify-end">
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="text-neutral-400 hover:text-yellow-500"
+                  >
+                    <Download className="w-4 h-4 mr-2" />
+                    Download
+                  </Button>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          {/* Desktop Table Layout */}
+          <div className="hidden sm:block overflow-x-auto">
             <table className="w-full">
               <thead>
                 <tr className="border-b border-neutral-700">

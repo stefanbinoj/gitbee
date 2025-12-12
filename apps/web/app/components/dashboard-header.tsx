@@ -1,6 +1,7 @@
 "use client";
 
 import { usePathname } from "next/navigation";
+import { docs } from "@/lib/docs-data";
 
 type PageConfig = {
   title: string;
@@ -63,7 +64,25 @@ const pageConfigs: Record<string, PageConfig> = {
 
 export function DashboardHeader() {
   const pathname = usePathname();
-  const config = pageConfigs[pathname] || pageConfigs["/dashboard"];
+
+  // Handle dynamic doc pages
+  let config = pageConfigs[pathname];
+
+  if (!config && pathname.startsWith("/dashboard/docs/")) {
+    const slug = pathname.split("/").pop();
+    const doc = docs.find((d) => d.slug === slug);
+    if (doc) {
+      config = {
+        title: doc.title.toUpperCase(),
+        breadcrumb: "DOCS",
+        description: doc.category,
+      };
+    }
+  }
+
+  // Fallback to dashboard if no config found
+  config = config || pageConfigs["/dashboard"];
+
   return (
     <div className="h-16 bg-neutral-900 border-b border-neutral-800 flex items-center justify-between px-6 shrink-0 z-10">
       <div className="flex items-center gap-4">

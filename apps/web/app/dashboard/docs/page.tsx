@@ -1,6 +1,5 @@
 "use client";
 
-import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -13,53 +12,10 @@ import {
   ExternalLink,
   List,
 } from "lucide-react";
+import Link from "next/link";
+import { docs } from "@/lib/docs-data";
 
 export default function DocsPage() {
-  const [docs] = useState([
-    {
-      id: 1,
-      title: "Getting Started with GitBee",
-      category: "Guides",
-      readTime: "5 min",
-      popular: true,
-    },
-    {
-      id: 2,
-      title: "Configuring Auto-Response Rules",
-      category: "Configuration",
-      readTime: "8 min",
-      popular: true,
-    },
-    {
-      id: 3,
-      title: "Integrating with Slack",
-      category: "Integrations",
-      readTime: "4 min",
-      popular: false,
-    },
-    {
-      id: 4,
-      title: "Understanding PR Analysis Reports",
-      category: "Features",
-      readTime: "6 min",
-      popular: true,
-    },
-    {
-      id: 5,
-      title: "Managing User Permissions",
-      category: "Administration",
-      readTime: "3 min",
-      popular: false,
-    },
-    {
-      id: 6,
-      title: "API Reference",
-      category: "Developer",
-      readTime: "15 min",
-      popular: false,
-    },
-  ]);
-
   return (
     <div className="space-y-6">
       {/* Search Header */}
@@ -99,7 +55,8 @@ export default function DocsPage() {
                 {docs
                   .filter((doc) => doc.popular)
                   .map((doc) => (
-                    <div
+                    <Link
+                      href={`/dashboard/docs/${doc.slug}`}
                       key={doc.id}
                       className="group flex items-center justify-between p-4 hover:bg-neutral-800/30 transition-colors cursor-pointer"
                     >
@@ -125,7 +82,7 @@ export default function DocsPage() {
                         </div>
                       </div>
                       <ChevronRight className="w-4 h-4 text-neutral-600 group-hover:text-neutral-400 transition-colors" />
-                    </div>
+                    </Link>
                   ))}
               </div>
             </CardContent>
@@ -175,7 +132,14 @@ export default function DocsPage() {
                   Join our community Discord or contact support directly.
                 </p>
               </div>
-              <Button className="w-full bg-neutral-800 hover:bg-neutral-700 text-white border border-neutral-700">
+              <Button
+                className="w-full bg-neutral-800 hover:bg-neutral-700 text-white border border-neutral-700 cursor-pointer"
+                onClick={() => {
+                  window.open(
+                    "https://mail.google.com/mail/?view=cm&fs=1&to=stefan.binoj.007@gmail.com"
+                  );
+                }}
+              >
                 Contact Support
               </Button>
             </CardContent>

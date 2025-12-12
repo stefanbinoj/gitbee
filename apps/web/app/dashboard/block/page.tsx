@@ -82,19 +82,6 @@ export default function BlockPage() {
     }
   };
 
-  const getRiskColor = (level: string) => {
-    switch (level) {
-      case "high":
-        return "text-red-400";
-      case "medium":
-        return "text-amber-400";
-      case "low":
-        return "text-neutral-400";
-      default:
-        return "text-neutral-400";
-    }
-  };
-
   return (
     <div className="space-y-6">
       <div className="bg-neutral-900 border border-neutral-800 rounded-lg p-6">
@@ -113,8 +100,8 @@ export default function BlockPage() {
         </div>
 
         {/* Search and Filter Bar */}
-        <div className="flex items-center justify-between gap-4 mb-6">
-          <div className="relative flex-1 max-w-md">
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-4 mb-6">
+          <div className="relative flex-1 sm:max-w-md">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-neutral-500" />
             <Input
               placeholder="Search users, reasons, or repositories"
@@ -132,8 +119,8 @@ export default function BlockPage() {
 
         {/* Table Section */}
         <div className="border border-neutral-800 rounded-md bg-neutral-900/50 overflow-hidden">
-          {/* Table Header */}
-          <div className="grid grid-cols-12 gap-4 px-4 py-3 border-b border-neutral-800 bg-neutral-900 text-xs font-medium text-neutral-500 uppercase tracking-wider">
+          {/* Desktop Table Header */}
+          <div className="hidden md:grid grid-cols-12 gap-4 px-4 py-3 border-b border-neutral-800 bg-neutral-900 text-xs font-medium text-neutral-500 uppercase tracking-wider">
             <div className="col-span-3">User</div>
             <div className="col-span-3">Reason</div>
             <div className="col-span-2">Repository</div>
@@ -150,54 +137,102 @@ export default function BlockPage() {
               </div>
             ) : (
               blockedUsers.map((user) => (
-                <div
-                  key={user.id}
-                  className="grid grid-cols-12 gap-4 px-4 py-3 items-center text-sm hover:bg-neutral-800/30 transition-colors group"
-                >
-                  <div className="col-span-3 flex items-center gap-3">
-                    <div className="w-8 h-8 rounded-full bg-neutral-800 flex items-center justify-center overflow-hidden border border-neutral-700">
-                      <UserX className="w-4 h-4 text-neutral-400" />
-                    </div>
-                    <div>
-                      <div className="font-medium text-neutral-300 truncate">
-                        {user.username}
+                <div key={user.id}>
+                  {/* Mobile Card Layout */}
+                  <div className="md:hidden p-4 space-y-3 border-b border-neutral-700">
+                    <div className="flex items-start justify-between">
+                      <div className="flex items-center gap-3">
+                        <div className="w-8 h-8 rounded-full bg-neutral-800 flex items-center justify-center overflow-hidden border border-neutral-700">
+                          <UserX className="w-4 h-4 text-neutral-400" />
+                        </div>
+                        <div>
+                          <div className="font-medium text-neutral-300">
+                            {user.username}
+                          </div>
+                        </div>
                       </div>
-                      <div
-                        className={`text-xs ${getRiskColor(user.riskLevel)}`}
+                      <span
+                        className={`inline-flex items-center px-2 py-0.5 rounded text-[10px] uppercase font-medium border ${getStatusColor(user.status)}`}
                       >
-                        ID: {user.id} • {user.riskLevel.toUpperCase()} RISK
+                        {user.status}
+                      </span>
+                    </div>
+                    <div className="space-y-2 text-sm">
+                      <div className="flex items-start gap-2">
+                        <span className="text-neutral-500 shrink-0">
+                          Reason:
+                        </span>
+                        <span className="text-neutral-400 flex items-center gap-1">
+                          {user.reason}
+                          {user.riskLevel === "high" && (
+                            <AlertTriangle className="w-3.5 h-3.5 text-red-500" />
+                          )}
+                        </span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <span className="text-neutral-500">Repository:</span>
+                        <span className="text-neutral-400 font-mono text-xs">
+                          {user.repository}
+                        </span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <span className="text-neutral-500">Date:</span>
+                        <span className="text-neutral-400 font-mono text-xs">
+                          {new Date(user.dateBlocked).toLocaleDateString()}
+                        </span>
                       </div>
                     </div>
+                    <div className="flex justify-end">
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="h-7 text-neutral-400 hover:text-white"
+                      >
+                        <MoreHorizontal className="w-4 h-4" />
+                      </Button>
+                    </div>
                   </div>
-                  <div className="col-span-3 text-neutral-400 flex items-center gap-2 truncate">
-                    <span className="truncate" title={user.reason}>
-                      {user.reason}
-                    </span>
-                    {user.riskLevel === "high" && (
-                      <AlertTriangle className="w-3.5 h-3.5 text-red-500 flex-shrink-0" />
-                    )}
-                  </div>
-                  <div className="col-span-2 text-neutral-500 font-mono text-xs truncate">
-                    {user.repository}
-                  </div>
-                  <div className="col-span-2">
-                    <span
-                      className={`inline-flex items-center px-2 py-0.5 rounded text-[10px] uppercase font-medium border ${getStatusColor(
-                        user.status,
-                      )}`}
-                    >
-                      {user.status}
-                    </span>
-                  </div>
-                  <div className="col-span-2 text-right text-neutral-500 text-xs font-mono">
-                    {new Date(user.dateBlocked).toLocaleDateString()}
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="h-6 w-6 ml-2 opacity-0 group-hover:opacity-100 transition-opacity"
-                    >
-                      <MoreHorizontal className="w-4 h-4" />
-                    </Button>
+
+                  {/* Desktop Row Layout */}
+                  <div className="hidden md:grid grid-cols-12 gap-4 px-4 py-3 items-center text-sm hover:bg-neutral-800/30 transition-colors group">
+                    <div className="col-span-3 flex items-center gap-3">
+                      <div className="w-8 h-8 rounded-full bg-neutral-800 flex items-center justify-center overflow-hidden border border-neutral-700">
+                        <UserX className="w-4 h-4 text-neutral-400" />
+                      </div>
+                      <div>
+                        <div className="font-medium text-neutral-300 truncate">
+                          {user.username}
+                        </div>
+                      </div>
+                    </div>
+                    <div className="col-span-3 text-neutral-400 flex items-center gap-2 truncate">
+                      <span className="truncate" title={user.reason}>
+                        {user.reason}
+                      </span>
+                      {user.riskLevel === "high" && (
+                        <AlertTriangle className="w-3.5 h-3.5 text-red-500 flex-shrink-0" />
+                      )}
+                    </div>
+                    <div className="col-span-2 text-neutral-500 font-mono text-xs truncate">
+                      {user.repository}
+                    </div>
+                    <div className="col-span-2">
+                      <span
+                        className={`inline-flex items-center px-2 py-0.5 rounded text-[10px] uppercase font-medium border ${getStatusColor(user.status)}`}
+                      >
+                        {user.status}
+                      </span>
+                    </div>
+                    <div className="col-span-2 text-right text-neutral-500 text-xs font-mono">
+                      {new Date(user.dateBlocked).toLocaleDateString()}
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-6 w-6 ml-2 opacity-0 group-hover:opacity-100 transition-opacity"
+                      >
+                        <MoreHorizontal className="w-4 h-4" />
+                      </Button>
+                    </div>
                   </div>
                 </div>
               ))
@@ -206,7 +241,7 @@ export default function BlockPage() {
         </div>
 
         {/* Pagination Footer */}
-        <div className="flex items-center justify-between text-xs text-neutral-500 mt-6">
+        <div className="flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-neutral-500 mt-6">
           <div className="flex items-center gap-2">
             <span>Items per page:</span>
             <Button
