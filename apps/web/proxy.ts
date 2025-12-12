@@ -10,6 +10,7 @@ export async function proxy(request: NextRequest) {
     const sessionToken = request.cookies.get(
       "better-auth.session_token"
     )?.value;
+    console.log("at dashboard", sessionToken);
 
     // If no session token, redirect to login
     if (!sessionToken) {
@@ -24,7 +25,7 @@ export async function proxy(request: NextRequest) {
     const sessionToken = request.cookies.get(
       "better-auth.session_token"
     )?.value;
-
+    console.log("at login", sessionToken);
     if (sessionToken) {
       return NextResponse.redirect(new URL("/dashboard", request.url));
     }
