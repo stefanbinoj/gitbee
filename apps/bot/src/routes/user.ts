@@ -5,6 +5,7 @@ import {
   installationSchema,
   settingsSchema,
   warningSchema,
+  rulesSchema,
   eq,
   and,
   inArray,
@@ -301,6 +302,269 @@ export const userRouter = new Elysia({ prefix: "/users" })
     {
       params: t.Object({
         githubAccountId: t.String(),
+      }),
+    },
+  )
+  // Rules CRUD endpoints
+  .get(
+    "/rules/:githubAccountId",
+    async ({ params }) => {
+      const { githubAccountId } = params;
+
+      const accountId = parseInt(githubAccountId, 10);
+
+      if (isNaN(accountId)) {
+        return { error: "Invalid GitHub account ID" };
+      }
+
+      try {
+        // Get all installations for this user
+        const userInstallations = await db
+          .select({ installationId: installationSchema.installationId })
+          .from(installationSchema)
+          .where(
+            and(
+              eq(installationSchema.senderId, accountId),
+              eq(installationSchema.isRemoved, false),
+            ),
+          );
+
+        if (userInstallations.length === 0) {
+          return { rules: [] };
+        }
+
+        const installationIds = userInstallations.map(
+          (inst) => inst.installationId,
+        );
+
+        // Get rules for these installations
+        const rules = await db
+          .select()
+          .from(rulesSchema)
+          .where(inArray(rulesSchema.installationId, installationIds))
+          .orderBy(desc(rulesSchema.createdAt));
+
+        return { rules };
+      } catch (error) {
+        console.error("Error fetching rules:", error);
+        return { error: "Failed to fetch rules" };
+      }
+    },
+    {
+      params: t.Object({
+        githubAccountId: t.String(),
+      }),
+    },
+  )
+  .post(
+    "/rules/:githubAccountId",
+    async ({ params, body }) => {
+      const { githubAccountId } = params;
+
+      const accountId = parseInt(githubAccountId, 10);
+
+      if (isNaN(accountId)) {
+        return { error: "Invalid GitHub account ID" };
+      }
+
+      try {
+        // Get the user's installation
+        const userInstallation = await db
+          .select({ installationId: installationSchema.installationId })
+          .from(installationSchema)
+          .where(
+            and(
+              eq(installationSchema.senderId, accountId),
+              eq(installationSchema.isRemoved, false),
+            ),
+          )
+          .limit(1);
+
+        if (userInstallation.length === 0) {
+          return { error: "No installation found" };
+        }
+
+        const installationId = userInstallation[0].installationId;
+
+        // Create the rule
+        const [newRule] = await db
+          .insert(rulesSchema)
+          .values({
+            installationId,
+            ruleType: body.ruleType,
+            ruleName: body.ruleName,
+            ruleText: body.ruleText,
+          })
+          .returning();
+
+        return { rule: newRule };
+      } catch (error) {
+        console.error("Error creating rule:", error);
+        return { error: "Failed to create rule" };
+      }
+    },
+    {
+      params: t.Object({
+        githubAccountId: t.String(),
+      }),
+      body: t.Object({
+        ruleType: t.Union([
+          t.Literal("comment"),
+          t.Literal("issue"),
+          t.Literal("pr"),
+        ]),
+        ruleName: t.String(),
+        ruleText: t.String(),
+      }),
+    },
+  )
+  .put(
+    "/rules/:githubAccountId/:ruleId",
+    async ({ params, body }) => {
+      const { githubAccountId, ruleId } = params;
+
+      const accountId = parseInt(githubAccountId, 10);
+      const ruleIdNum = parseInt(ruleId, 10);
+
+      if (isNaN(accountId)) {
+        return { error: "Invalid GitHub account ID" };
+      }
+
+      if (isNaN(ruleIdNum)) {
+        return { error: "Invalid rule ID" };
+      }
+
+      try {
+        // Get the user's installations to verify ownership
+        const userInstallations = await db
+          .select({ installationId: installationSchema.installationId })
+          .from(installationSchema)
+          .where(
+            and(
+              eq(installationSchema.senderId, accountId),
+              eq(installationSchema.isRemoved, false),
+            ),
+          );
+
+        if (userInstallations.length === 0) {
+          return { error: "No installation found" };
+        }
+
+        const installationIds = userInstallations.map(
+          (inst) => inst.installationId,
+        );
+
+        // Verify the rule belongs to one of the user's installations
+        const existingRule = await db
+          .select()
+          .from(rulesSchema)
+          .where(
+            and(
+              eq(rulesSchema.id, ruleIdNum),
+              inArray(rulesSchema.installationId, installationIds),
+            ),
+          )
+          .limit(1);
+
+        if (existingRule.length === 0) {
+          return { error: "Rule not found" };
+        }
+
+        // Update the rule
+        const [updatedRule] = await db
+          .update(rulesSchema)
+          .set({
+            ...body,
+            updatedAt: new Date(),
+          })
+          .where(eq(rulesSchema.id, ruleIdNum))
+          .returning();
+
+        return { rule: updatedRule };
+      } catch (error) {
+        console.error("Error updating rule:", error);
+        return { error: "Failed to update rule" };
+      }
+    },
+    {
+      params: t.Object({
+        githubAccountId: t.String(),
+        ruleId: t.String(),
+      }),
+      body: t.Object({
+        ruleType: t.Optional(
+          t.Union([t.Literal("comment"), t.Literal("issue"), t.Literal("pr")]),
+        ),
+        ruleName: t.Optional(t.String()),
+        ruleText: t.Optional(t.String()),
+      }),
+    },
+  )
+  .delete(
+    "/rules/:githubAccountId/:ruleId",
+    async ({ params }) => {
+      const { githubAccountId, ruleId } = params;
+
+      const accountId = parseInt(githubAccountId, 10);
+      const ruleIdNum = parseInt(ruleId, 10);
+
+      if (isNaN(accountId)) {
+        return { error: "Invalid GitHub account ID" };
+      }
+
+      if (isNaN(ruleIdNum)) {
+        return { error: "Invalid rule ID" };
+      }
+
+      try {
+        // Get the user's installations to verify ownership
+        const userInstallations = await db
+          .select({ installationId: installationSchema.installationId })
+          .from(installationSchema)
+          .where(
+            and(
+              eq(installationSchema.senderId, accountId),
+              eq(installationSchema.isRemoved, false),
+            ),
+          );
+
+        if (userInstallations.length === 0) {
+          return { error: "No installation found" };
+        }
+
+        const installationIds = userInstallations.map(
+          (inst) => inst.installationId,
+        );
+
+        // Verify the rule belongs to one of the user's installations
+        const existingRule = await db
+          .select()
+          .from(rulesSchema)
+          .where(
+            and(
+              eq(rulesSchema.id, ruleIdNum),
+              inArray(rulesSchema.installationId, installationIds),
+            ),
+          )
+          .limit(1);
+
+        if (existingRule.length === 0) {
+          return { error: "Rule not found" };
+        }
+
+        // Delete the rule
+        await db.delete(rulesSchema).where(eq(rulesSchema.id, ruleIdNum));
+
+        return { success: true };
+      } catch (error) {
+        console.error("Error deleting rule:", error);
+        return { error: "Failed to delete rule" };
+      }
+    },
+    {
+      params: t.Object({
+        githubAccountId: t.String(),
+        ruleId: t.String(),
       }),
     },
   );

@@ -11,9 +11,9 @@ export const rulesSchema = pgTable("rules", {
     .notNull()
     .references(() => installationSchema.installationId),
 
-  targetId: integer("target_id").notNull(),
-
   ruleType: text("rule_type").notNull().$type<RuleType>(),
+
+  ruleName: text("rule_name").notNull(),
   ruleText: text("rule_text").notNull(),
 
   createdAt: timestamp("created_at").notNull().defaultNow(),
