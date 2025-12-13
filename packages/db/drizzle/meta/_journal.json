@@ -5,15 +5,8 @@
     {
       "idx": 0,
       "version": "7",
-      "when": 1765626253090,
-      "tag": "0000_volatile_phalanx",
-      "breakpoints": true
-    },
-    {
-      "idx": 1,
-      "version": "7",
-      "when": 1765628003706,
-      "tag": "0001_whole_psynapse",
+      "when": 1765635211166,
+      "tag": "0000_busy_mojo",
       "breakpoints": true
     }
   ]

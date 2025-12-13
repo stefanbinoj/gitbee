@@ -1,4 +1,4 @@
-import { app } from "@gitbee/octokit";
+import { app, type Octokit } from "@gitbee/octokit";
 import { issueGraph } from "@/langgraph/issueGraph";
 import { shouldSkipEvent } from "@/botActions/utils";
 import { createReport, updateReportStatus } from "../services/report.service";
@@ -18,10 +18,8 @@ function extractIssueContext(payload: any, octokit: any) {
   };
 }
 
-async function handleIssue(payload: any, octokit: any, action: string) {
-  console.log(
-    `[Issue] ${action} by ${payload.issue.user.login} - #${payload.issue.number}: ${payload.issue.title}`
-  );
+async function handleIssue(payload: any, octokit: Octokit, action: string) {
+  console.log(`[Issue] ${action} by ${payload.issue.user.login} - #${payload.issue.number}: ${payload.issue.title}`);
 
   if (shouldSkipEvent(payload.issue)) {
     console.log("[Issue] Skipping - bot or privileged user");
@@ -38,7 +36,7 @@ async function handleIssue(payload: any, octokit: any, action: string) {
       repositoryId: payload.repository.id,
       repositoryFullName: payload.repository.full_name,
       reportType: "issue_analysis",
-      url: payload.comment.html_url,
+      url: payload.issue.html_url,
     });
     reportId = report.id;
 
@@ -46,34 +44,6 @@ async function handleIssue(payload: any, octokit: any, action: string) {
     const finalDecision = result.finalDecision;
     if (finalDecision?.final_action === "comment") {
       let body = finalDecision.final_comment;
-      const reason = "";
-      if (finalDecision.should_flag === 1) {
-        body +=
-          "\n \n⚠️ **This comment has been flagged for review by the moderation system.**";
-        createWarning({
-          installationId: context.installationId,
-          repositoryId: payload.repository.id,
-          repositoryFullName: payload.repository.full_name,
-
-          userLogin: payload.sender.login,
-          userId: payload.sender.id,
-          reason: reason,
-          type: "warning",
-        });
-      } else if (finalDecision.should_flag === 2) {
-        body +=
-          "\n \n🚨 **This comment has been automatically flagged and will be reviewed by the moderation team.**";
-        createWarning({
-          installationId: context.installationId,
-          repositoryId: payload.repository.id,
-          repositoryFullName: payload.repository.full_name,
-
-          userLogin: payload.sender.login,
-          userId: payload.sender.id,
-          reason: reason,
-          type: "block",
-        });
-      }
 
       await octokit.rest.issues.createComment({
         owner: context.owner,
@@ -81,12 +51,24 @@ async function handleIssue(payload: any, octokit: any, action: string) {
         issue_number: context.issueNumber,
         body: body,
       });
+
+      if (finalDecision.should_flag === 2) {
+        await octokit.rest.issues.update({
+          owner: context.owner,
+          repo: context.repo,
+          issue_number: context.issueNumber,
+          state: "closed",
+        });
+      }
     } else if (finalDecision?.final_action === "approve") {
-      console.log("[IssueComment] Comment approved, no action taken.");
+      console.log("[Issue] Issue approved, no action taken.");
     }
     updateReportStatus(report.id, "completed");
   } catch (error) {
     console.error("[Issue] Graph execution failed:", error);
+    if (error instanceof Error && "cause" in error) {
+      console.error("[Issue] Error cause:", (error as any).cause);
+    }
     if (reportId !== undefined) {
       updateReportStatus(reportId, "failed");
     }

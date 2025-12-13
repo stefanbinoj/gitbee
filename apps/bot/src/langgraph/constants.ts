@@ -4,7 +4,7 @@ export const MODELS = {
    *     moonshotai/kimi-k2:free
    *     openai/gpt-oss-120b:free
    */
-  CHEAP: "z-ai/glm-4.5-air:free",
+  CHEAP: "openai/gpt-oss-120b",
   STANDARD: "moonshotai/kimi-k2-thinking",
 } as const;
 

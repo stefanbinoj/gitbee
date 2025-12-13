@@ -1,5 +1,5 @@
 {
-  "id": "1f80809c-64f9-4d40-8311-b84689ca6b5e",
+  "id": "5d55801e-5582-4ef9-9df2-7ab02b96c111",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "version": "7",
   "dialect": "postgresql",
@@ -395,8 +395,7 @@
         },
         "repository_visibility": {
           "name": "repository_visibility",
-          "type": "repository_visibility",
-          "typeSchema": "public",
+          "type": "text",
           "primaryKey": false,
           "notNull": true
         },
@@ -469,8 +468,7 @@
         },
         "target_type": {
           "name": "target_type",
-          "type": "account_type",
-          "typeSchema": "public",
+          "type": "text",
           "primaryKey": false,
           "notNull": true
         },
@@ -488,8 +486,7 @@
         },
         "repository_selection": {
           "name": "repository_selection",
-          "type": "repository_selection",
-          "typeSchema": "public",
+          "type": "text",
           "primaryKey": false,
           "notNull": true
         },
@@ -507,8 +504,7 @@
         },
         "sender_type": {
           "name": "sender_type",
-          "type": "account_type",
-          "typeSchema": "public",
+          "type": "text",
           "primaryKey": false,
           "notNull": false
         },
@@ -622,16 +618,14 @@
         },
         "strictness": {
           "name": "strictness",
-          "type": "strictness",
-          "typeSchema": "public",
+          "type": "text",
           "primaryKey": false,
           "notNull": true,
           "default": "'medium'"
         },
         "response_tone": {
           "name": "response_tone",
-          "type": "response_tone",
-          "typeSchema": "public",
+          "type": "text",
           "primaryKey": false,
           "notNull": true,
           "default": "'friendly'"
@@ -717,15 +711,13 @@
         },
         "report_type": {
           "name": "report_type",
-          "type": "report_type",
-          "typeSchema": "public",
+          "type": "text",
           "primaryKey": false,
           "notNull": true
         },
         "status": {
           "name": "status",
-          "type": "report_status",
-          "typeSchema": "public",
+          "type": "text",
           "primaryKey": false,
           "notNull": true,
           "default": "'in_progress'"
@@ -803,8 +795,7 @@
         },
         "rule_type": {
           "name": "rule_type",
-          "type": "rule_type",
-          "typeSchema": "public",
+          "type": "text",
           "primaryKey": false,
           "notNull": true
         },
@@ -893,8 +884,7 @@
         },
         "type": {
           "name": "type",
-          "type": "warning_type",
-          "typeSchema": "public",
+          "type": "text",
           "primaryKey": false,
           "notNull": true
         },
@@ -903,6 +893,12 @@
           "type": "text",
           "primaryKey": false,
           "notNull": true
+        },
+        "url": {
+          "name": "url",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
         },
         "created_at": {
           "name": "created_at",

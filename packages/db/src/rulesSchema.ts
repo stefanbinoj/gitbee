@@ -1,7 +1,8 @@
-import { pgTable, text, timestamp, integer, pgEnum, serial } from "drizzle-orm/pg-core";
+import { pgTable, text, timestamp, integer, serial } from "drizzle-orm/pg-core";
 import { installationSchema } from "./installationSchema";
 
-const ruleTypeEnum = pgEnum("rule_type", ["comment", "issue", "pr"]);
+// Type definitions for type safety (replaces pgEnum)
+export type RuleType = "comment" | "issue" | "pr";
 
 export const rulesSchema = pgTable("rules", {
   id: serial("id").primaryKey(),
@@ -12,7 +13,7 @@ export const rulesSchema = pgTable("rules", {
 
   targetId: integer("target_id").notNull(),
 
-  ruleType: ruleTypeEnum("rule_type").notNull(),
+  ruleType: text("rule_type").notNull().$type<RuleType>(),
   ruleText: text("rule_text").notNull(),
 
   createdAt: timestamp("created_at").notNull().defaultNow(),

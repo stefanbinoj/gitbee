@@ -4,38 +4,32 @@ import {
   timestamp,
   boolean,
   integer,
-  pgEnum,
   serial,
 } from "drizzle-orm/pg-core";
 import { relations } from "drizzle-orm";
 
-const accountTypeEnum = pgEnum("account_type", ["User", "Organization", "Bot"]);
-const repositorySelectionEnum = pgEnum("repository_selection", [
-  "all",
-  "selected",
-]);
-const repositoryVisibilityEnum = pgEnum("repository_visibility", [
-  "private",
-  "public",
-]);
-const strictnessEnum = pgEnum("strictness", ["low", "medium", "high"]);
-const responseToneEnum = pgEnum("response_tone", ["professional", "friendly"]);
+// Type definitions for type safety (replaces pgEnum)
+export type AccountType = "User" | "Organization" | "Bot";
+export type RepositorySelection = "all" | "selected";
+export type RepositoryVisibility = "private" | "public";
+export type Strictness = "low" | "medium" | "high";
+export type ResponseTone = "professional" | "friendly";
 
 export const installationSchema = pgTable("installations", {
   id: serial("id").primaryKey(),
   installationId: integer("installation_id").notNull().unique(),
 
-  targetType: accountTypeEnum("target_type").notNull(),
+  targetType: text("target_type").notNull().$type<AccountType>(),
   targetLogin: text("target_login").notNull().unique(),
   targetId: integer("target_id").notNull().unique(),
 
-  repositorySelection: repositorySelectionEnum(
-    "repository_selection"
-  ).notNull(),
+  repositorySelection: text("repository_selection")
+    .notNull()
+    .$type<RepositorySelection>(),
 
   senderLogin: text("sender_login"),
   senderId: integer("sender_id"),
-  senderType: accountTypeEnum("sender_type"),
+  senderType: text("sender_type").$type<AccountType>(),
 
   isRemoved: boolean("is_removed").notNull().default(false),
 
@@ -49,7 +43,7 @@ export const installationRelations = relations(
   ({ many, one }) => ({
     repositories: many(installationRepositoriesSchema),
     settings: one(settingsSchema),
-  })
+  }),
 );
 
 export const installationRepositoriesSchema = pgTable(
@@ -63,14 +57,14 @@ export const installationRepositoriesSchema = pgTable(
 
     repositoryId: integer("repository_id").notNull().unique(),
     repositoryFullName: text("repository_full_name").notNull(),
-    repositoryVisibility: repositoryVisibilityEnum(
-      "repository_visibility"
-    ).notNull(),
+    repositoryVisibility: text("repository_visibility")
+      .notNull()
+      .$type<RepositoryVisibility>(),
 
     addedAt: timestamp("added_at").notNull().defaultNow(),
     removedAt: timestamp("removed_at"),
     isRemoved: boolean("is_removed").notNull().default(false),
-  }
+  },
 );
 
 export const installationRepositoriesRelations = relations(
@@ -80,7 +74,7 @@ export const installationRepositoriesRelations = relations(
       fields: [installationRepositoriesSchema.targetId],
       references: [installationSchema.targetId],
     }),
-  })
+  }),
 );
 
 export const settingsSchema = pgTable("settings", {
@@ -101,8 +95,14 @@ export const settingsSchema = pgTable("settings", {
     .notNull()
     .default(false),
 
-  strictness: strictnessEnum("strictness").notNull().default("medium"),
-  responseTone: responseToneEnum("response_tone").notNull().default("friendly"),
+  strictness: text("strictness")
+    .notNull()
+    .default("medium")
+    .$type<Strictness>(),
+  responseTone: text("response_tone")
+    .notNull()
+    .default("friendly")
+    .$type<ResponseTone>(),
 
   moderateMembers: boolean("moderate_members").notNull().default(false),
   warningCount: integer("warning_count").notNull().default(0),

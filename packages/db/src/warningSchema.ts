@@ -1,14 +1,8 @@
-import {
-  pgTable,
-  text,
-  timestamp,
-  integer,
-  serial,
-  pgEnum,
-} from "drizzle-orm/pg-core";
+import { pgTable, text, timestamp, integer, serial } from "drizzle-orm/pg-core";
 import { installationSchema } from "./installationSchema";
 
-const warningType = pgEnum("warning_type", ["warning", "block"]);
+// Type definitions for type safety (replaces pgEnum)
+export type WarningType = "warning" | "block";
 
 export const warningSchema = pgTable("warnings", {
   id: serial("id").primaryKey(),
@@ -23,7 +17,7 @@ export const warningSchema = pgTable("warnings", {
   userLogin: text("user_login").notNull(),
   userId: integer("user_id").notNull(),
 
-  type: warningType("type").notNull(),
+  type: text("type").notNull().$type<WarningType>(),
   reason: text("reason").notNull(),
 
   url: text("url"),

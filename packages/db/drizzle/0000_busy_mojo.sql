@@ -1,13 +1,3 @@
-CREATE TYPE "public"."account_type" AS ENUM('User', 'Organization', 'Bot');--> statement-breakpoint
-CREATE TYPE "public"."repository_selection" AS ENUM('all', 'selected');--> statement-breakpoint
-CREATE TYPE "public"."repository_visibility" AS ENUM('private', 'public');--> statement-breakpoint
-CREATE TYPE "public"."strictness" AS ENUM('low', 'medium', 'high');--> statement-breakpoint
-CREATE TYPE "public"."response_tone" AS ENUM('professional', 'friendly');--> statement-breakpoint
-CREATE TYPE "public"."report_type" AS ENUM('ingestion', 'comment_analysis', 'pr_analysis', 'issue_analysis');--> statement-breakpoint
-CREATE TYPE "public"."report_status" AS ENUM('in_progress', 'completed', 'failed');--> statement-breakpoint
-CREATE TYPE "public"."rule_type" AS ENUM('comment', 'issue', 'pr');--> statement-breakpoint
-CREATE TYPE "public"."warning_type" AS ENUM('warning', 'block');--> statement-breakpoint
-
 CREATE TABLE "account" (
 	"id" text PRIMARY KEY NOT NULL,
 	"account_id" text NOT NULL,
@@ -62,7 +52,7 @@ CREATE TABLE "installation_repositories" (
 	"target_id" integer NOT NULL,
 	"repository_id" integer NOT NULL,
 	"repository_full_name" text NOT NULL,
-	"repository_visibility" "repository_visibility" NOT NULL,
+	"repository_visibility" text NOT NULL,
 	"added_at" timestamp DEFAULT now() NOT NULL,
 	"removed_at" timestamp,
 	"is_removed" boolean DEFAULT false NOT NULL,
@@ -72,13 +62,13 @@ CREATE TABLE "installation_repositories" (
 CREATE TABLE "installations" (
 	"id" serial PRIMARY KEY NOT NULL,
 	"installation_id" integer NOT NULL,
-	"target_type" "account_type" NOT NULL,
+	"target_type" text NOT NULL,
 	"target_login" text NOT NULL,
 	"target_id" integer NOT NULL,
-	"repository_selection" "repository_selection" NOT NULL,
+	"repository_selection" text NOT NULL,
 	"sender_login" text,
 	"sender_id" integer,
-	"sender_type" "account_type",
+	"sender_type" text,
 	"is_removed" boolean DEFAULT false NOT NULL,
 	"created_at" timestamp DEFAULT now() NOT NULL,
 	"updated_at" timestamp,
@@ -96,8 +86,8 @@ CREATE TABLE "settings" (
 	"auto_close_irrelevant_issues" boolean DEFAULT true NOT NULL,
 	"auto_close_irrelevant_prs" boolean DEFAULT true NOT NULL,
 	"review_comments_for_prs" boolean DEFAULT false NOT NULL,
-	"strictness" "strictness" DEFAULT 'medium' NOT NULL,
-	"response_tone" "response_tone" DEFAULT 'friendly' NOT NULL,
+	"strictness" text DEFAULT 'medium' NOT NULL,
+	"response_tone" text DEFAULT 'friendly' NOT NULL,
 	"moderate_members" boolean DEFAULT false NOT NULL,
 	"warning_count" integer DEFAULT 0 NOT NULL,
 	"created_at" timestamp DEFAULT now() NOT NULL,
@@ -109,8 +99,8 @@ CREATE TABLE "reports" (
 	"installation_id" integer NOT NULL,
 	"repository_id" integer NOT NULL,
 	"repository_full_name" text NOT NULL,
-	"report_type" "report_type" NOT NULL,
-	"status" "report_status" DEFAULT 'in_progress' NOT NULL,
+	"report_type" text NOT NULL,
+	"status" text DEFAULT 'in_progress' NOT NULL,
 	"url" text,
 	"created_at" timestamp DEFAULT now() NOT NULL,
 	"updated_at" timestamp DEFAULT now() NOT NULL,
@@ -121,7 +111,7 @@ CREATE TABLE "rules" (
 	"id" serial PRIMARY KEY NOT NULL,
 	"installation_id" integer NOT NULL,
 	"target_id" integer NOT NULL,
-	"rule_type" "rule_type" NOT NULL,
+	"rule_type" text NOT NULL,
 	"rule_text" text NOT NULL,
 	"created_at" timestamp DEFAULT now() NOT NULL,
 	"updated_at" timestamp DEFAULT now() NOT NULL
@@ -134,8 +124,9 @@ CREATE TABLE "warnings" (
 	"repository_full_name" text NOT NULL,
 	"user_login" text NOT NULL,
 	"user_id" integer NOT NULL,
-	"type" "warning_type" NOT NULL,
+	"type" text NOT NULL,
 	"reason" text NOT NULL,
+	"url" text,
 	"created_at" timestamp DEFAULT now() NOT NULL
 );
 --> statement-breakpoint
