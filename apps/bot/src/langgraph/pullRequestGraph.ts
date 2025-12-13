@@ -1,108 +1,66 @@
 import { StateGraph, START, END, Annotation } from "@langchain/langgraph";
 import { type Octokit } from "@gitbee/octokit";
+import { finalDecisionResult } from "./constants";
 
-export interface PRCheckResult {
-  isValid: boolean;
-  reason?: string;
-  confidence: number;
+interface guidelinesResult {
+  is_valid: boolean;
+  comment?: string;
+}
+
+interface profinaityResult {
+  comment_needed: boolean; // handle true
+  comment?: string;
 }
 
 const PullRequestStateAnnotation = Annotation.Root({
   authorAssociation: Annotation<string>,
-  installationId: Annotation<number>,
+
   prTitle: Annotation<string>,
   prBody: Annotation<string>,
+  prNumber: Annotation<number>,
+
   senderLogin: Annotation<string>,
+
   owner: Annotation<string>,
   repo: Annotation<string>,
-  prNumber: Annotation<number>,
   octokit: Annotation<Octokit>,
 
   changedFiles: Annotation<string[] | undefined>,
   linkedIssues: Annotation<string[] | undefined>,
 
-  qualityResult: Annotation<PRCheckResult | undefined>,
-  guidelinesResult: Annotation<PRCheckResult | undefined>,
+  guidelinesResult: Annotation<guidelinesResult | undefined>,
+  profanityResult: Annotation<profinaityResult | undefined>,
 
-  finalDecision: Annotation<
-    | {
-        shouldFlag: boolean;
-        reason: string;
-        action: "none" | "warning" | "request_changes" | "close";
-      }
-    | undefined
-  >,
+  finalDecision: Annotation<finalDecisionResult | undefined>,
 });
 
 type PullRequestState = typeof PullRequestStateAnnotation.State;
 
-async function checkPRQuality(
-  state: PullRequestState
-): Promise<Partial<PullRequestState>> {
-  const { owner, repo, prNumber, octokit } = state;
+async function checkGuidelines(_state: PullRequestState): Promise<Partial<PullRequestState>> {
+  return {};
+}
 
-  const filesResponse = await octokit.request(
-    "GET /repos/{owner}/{repo}/pulls/{pull_number}/files",
-    { owner, repo, pull_number: prNumber, per_page: 100 }
-  );
+async function checkProfanity(_state: PullRequestState): Promise<Partial<PullRequestState>> {
+  const { owner, repo, prNumber, octokit } = _state;
+
+  const filesResponse = await octokit.request("GET /repos/{owner}/{repo}/pulls/{pull_number}/files", { owner, repo, pull_number: prNumber, per_page: 100 });
 
   const changedFiles = filesResponse.data.map((f: any) => f.filename);
 
-  const qualityResult: PRCheckResult = {
-    isValid: true,
-    confidence: 0.8,
-    reason: "PR structure looks good",
-  };
-
-  return { changedFiles, qualityResult };
+  return { changedFiles };
 }
 
-async function checkGuidelines(
-  _state: PullRequestState
-): Promise<Partial<PullRequestState>> {
-  const guidelinesResult: PRCheckResult = {
-    isValid: true,
-    confidence: 0.8,
-    reason: "PR follows contribution guidelines",
-  };
-
-  return { guidelinesResult };
-}
-
-async function makeFinalDecision(
-  state: PullRequestState
-): Promise<Partial<PullRequestState>> {
-  const { qualityResult, guidelinesResult, senderLogin } = state;
-
-  const quality = qualityResult ?? { isValid: true, confidence: 0.5 };
-  const guidelines = guidelinesResult ?? { isValid: true, confidence: 0.5 };
-
-  const shouldFlag = !quality.isValid || !guidelines.isValid;
-
-  let action: "none" | "warning" | "request_changes" | "close" = "none";
-  let reason = "PR passed all checks";
-
-  if (!quality.isValid) {
-    action = quality.confidence > 0.9 ? "request_changes" : "warning";
-    reason = quality.reason ?? "PR quality issues detected";
-  } else if (!guidelines.isValid) {
-    action = "warning";
-    reason = guidelines.reason ?? "PR may not follow guidelines";
-  }
-
-  const finalDecision = { shouldFlag, reason, action };
-  console.log(`[PRGraph] Final decision for @${senderLogin}:`, finalDecision);
-
-  return { finalDecision };
+async function makeFinalDecision(_state: PullRequestState): Promise<Partial<PullRequestState>> {
+  return {};
 }
 
 export const pullRequestGraph = new StateGraph(PullRequestStateAnnotation)
-  .addNode("checkQuality", checkPRQuality)
+  .addNode("checkProfanity", checkProfanity)
   .addNode("checkGuidelines", checkGuidelines)
   .addNode("decide", makeFinalDecision)
-  .addEdge(START, "checkQuality")
+  .addEdge(START, "checkProfanity")
   .addEdge(START, "checkGuidelines")
-  .addEdge("checkQuality", "decide")
+  .addEdge("checkProfanity", "decide")
   .addEdge("checkGuidelines", "decide")
   .addEdge("decide", END);
 
