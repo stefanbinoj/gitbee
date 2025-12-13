@@ -6,7 +6,6 @@ interface CreateReportData {
   installationId: number;
   repositoryId: number;
   repositoryFullName: string;
-  targetId: number;
   reportType: ReportType;
   url?: string;
 }
@@ -18,7 +17,6 @@ export async function createReport(data: CreateReportData) {
       installationId: data.installationId,
       repositoryId: data.repositoryId,
       repositoryFullName: data.repositoryFullName,
-      targetId: data.targetId,
       reportType: data.reportType,
       status: "in_progress",
       url: data.url,
@@ -28,10 +26,7 @@ export async function createReport(data: CreateReportData) {
   return result[0];
 }
 
-export async function updateReportStatus(
-  reportId: number,
-  status: ReportStatus,
-) {
+export async function updateReportStatus(reportId: number, status: ReportStatus) {
   return db
     .update(reportSchema)
     .set({

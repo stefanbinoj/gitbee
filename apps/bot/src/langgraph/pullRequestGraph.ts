@@ -28,7 +28,7 @@ const PullRequestStateAnnotation = Annotation.Root({
     | {
         shouldFlag: boolean;
         reason: string;
-        action: "none" | "warn" | "request_changes" | "close";
+        action: "none" | "warning" | "request_changes" | "close";
       }
     | undefined
   >,
@@ -37,13 +37,13 @@ const PullRequestStateAnnotation = Annotation.Root({
 type PullRequestState = typeof PullRequestStateAnnotation.State;
 
 async function checkPRQuality(
-  state: PullRequestState,
+  state: PullRequestState
 ): Promise<Partial<PullRequestState>> {
   const { owner, repo, prNumber, octokit } = state;
 
   const filesResponse = await octokit.request(
     "GET /repos/{owner}/{repo}/pulls/{pull_number}/files",
-    { owner, repo, pull_number: prNumber, per_page: 100 },
+    { owner, repo, pull_number: prNumber, per_page: 100 }
   );
 
   const changedFiles = filesResponse.data.map((f: any) => f.filename);
@@ -58,7 +58,7 @@ async function checkPRQuality(
 }
 
 async function checkGuidelines(
-  _state: PullRequestState,
+  _state: PullRequestState
 ): Promise<Partial<PullRequestState>> {
   const guidelinesResult: PRCheckResult = {
     isValid: true,
@@ -70,7 +70,7 @@ async function checkGuidelines(
 }
 
 async function makeFinalDecision(
-  state: PullRequestState,
+  state: PullRequestState
 ): Promise<Partial<PullRequestState>> {
   const { qualityResult, guidelinesResult, senderLogin } = state;
 
@@ -79,14 +79,14 @@ async function makeFinalDecision(
 
   const shouldFlag = !quality.isValid || !guidelines.isValid;
 
-  let action: "none" | "warn" | "request_changes" | "close" = "none";
+  let action: "none" | "warning" | "request_changes" | "close" = "none";
   let reason = "PR passed all checks";
 
   if (!quality.isValid) {
-    action = quality.confidence > 0.9 ? "request_changes" : "warn";
+    action = quality.confidence > 0.9 ? "request_changes" : "warning";
     reason = quality.reason ?? "PR quality issues detected";
   } else if (!guidelines.isValid) {
-    action = "warn";
+    action = "warning";
     reason = guidelines.reason ?? "PR may not follow guidelines";
   }
 

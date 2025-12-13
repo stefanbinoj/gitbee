@@ -43,6 +43,12 @@ async function checkIssueQuality(_state: IssueState): Promise<Partial<IssueState
 
 async function checkDuplicates(_state: IssueState): Promise<Partial<IssueState>> {
 
+  return {
+    duplicateResult: { is_duplicate: false },
+  };
+}
+
+async function checkProfanity(_state: IssueState): Promise<Partial<IssueState>> {
   return {};
 }
 
@@ -53,11 +59,14 @@ async function makeFinalDecision(_state: IssueState): Promise<Partial<IssueState
 export const issueGraph = new StateGraph(IssueStateAnnotation)
   .addNode("checkQuality", checkIssueQuality)
   .addNode("checkDuplicates", checkDuplicates)
+  .addNode("checkProfanity", checkProfanity)
   .addNode("decide", makeFinalDecision)
   .addEdge(START, "checkQuality")
   .addEdge(START, "checkDuplicates")
+  .addEdge(START, "checkProfanity")
   .addEdge("checkQuality", "decide")
   .addEdge("checkDuplicates", "decide")
+  .addEdge("checkProfanity", "decide")
   .addEdge("decide", END);
 
 export type { IssueState };

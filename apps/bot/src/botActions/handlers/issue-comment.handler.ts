@@ -38,7 +38,6 @@ async function handleComment(payload: any, octokit: Octokit, action: string) {
       installationId: context.installationId,
       repositoryId: payload.repository.id,
       repositoryFullName: payload.repository.full_name,
-      targetId: payload.installation.id,
       reportType: "comment_analysis",
       url: payload.comment.html_url,
     });

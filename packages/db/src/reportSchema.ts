@@ -30,8 +30,6 @@ export const reportSchema = pgTable("reports", {
   repositoryId: integer("repository_id").notNull(),
   repositoryFullName: text("repository_full_name").notNull(),
 
-  targetId: integer("target_id").notNull(),
-
   reportType: reportTypeEnum("report_type").notNull(),
   status: reportStatusEnum("status").notNull().default("in_progress"),
 

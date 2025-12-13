@@ -1,6 +1,6 @@
 {
-  "id": "e5cafe95-1218-49bb-8dcc-1c3a5bc409aa",
-  "prevId": "3bc046b2-cdfd-40e1-a50e-0d6364171693",
+  "id": "1b3cdcf1-b600-4070-839d-770cb3d03cc5",
+  "prevId": "e5cafe95-1218-49bb-8dcc-1c3a5bc409aa",
   "version": "7",
   "dialect": "postgresql",
   "tables": {
@@ -857,8 +857,8 @@
       "checkConstraints": {},
       "isRLSEnabled": false
     },
-    "public.blocks": {
-      "name": "blocks",
+    "public.warnings": {
+      "name": "warnings",
       "schema": "",
       "columns": {
         "id": {
@@ -903,6 +903,13 @@
           "primaryKey": false,
           "notNull": true
         },
+        "type": {
+          "name": "type",
+          "type": "warning_type",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": true
+        },
         "reason": {
           "name": "reason",
           "type": "text",
@@ -919,9 +926,9 @@
       },
       "indexes": {},
       "foreignKeys": {
-        "blocks_installation_id_installations_installation_id_fk": {
-          "name": "blocks_installation_id_installations_installation_id_fk",
-          "tableFrom": "blocks",
+        "warnings_installation_id_installations_installation_id_fk": {
+          "name": "warnings_installation_id_installations_installation_id_fk",
+          "tableFrom": "warnings",
           "tableTo": "installations",
           "columnsFrom": [
             "installation_id"
