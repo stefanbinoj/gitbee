@@ -19,7 +19,9 @@ function extractIssueContext(payload: any, octokit: any) {
 }
 
 async function handleIssue(payload: any, octokit: any, action: string) {
-  console.log(`[Issue] ${action} by ${payload.issue.user.login} - #${payload.issue.number}: ${payload.issue.title}`);
+  console.log(
+    `[Issue] ${action} by ${payload.issue.user.login} - #${payload.issue.number}: ${payload.issue.title}`
+  );
 
   if (shouldSkipEvent(payload.issue)) {
     console.log("[Issue] Skipping - bot or privileged user");
@@ -45,8 +47,9 @@ async function handleIssue(payload: any, octokit: any, action: string) {
     if (finalDecision?.final_action === "comment") {
       let body = finalDecision.final_comment;
       const reason = "";
-      if (finalDecision.shouldFlag === 1) {
-        body += "\n \n⚠️ **This comment has been flagged for review by the moderation system.**";
+      if (finalDecision.should_flag === 1) {
+        body +=
+          "\n \n⚠️ **This comment has been flagged for review by the moderation system.**";
         createWarning({
           installationId: context.installationId,
           repositoryId: payload.repository.id,
@@ -57,8 +60,9 @@ async function handleIssue(payload: any, octokit: any, action: string) {
           reason: reason,
           type: "warning",
         });
-      } else if (finalDecision.shouldFlag === 2) {
-        body += "\n \n🚨 **This comment has been automatically flagged and will be reviewed by the moderation team.**";
+      } else if (finalDecision.should_flag === 2) {
+        body +=
+          "\n \n🚨 **This comment has been automatically flagged and will be reviewed by the moderation team.**";
         createWarning({
           installationId: context.installationId,
           repositoryId: payload.repository.id,
@@ -83,6 +87,9 @@ async function handleIssue(payload: any, octokit: any, action: string) {
     updateReportStatus(report.id, "completed");
   } catch (error) {
     console.error("[Issue] Graph execution failed:", error);
+    if (reportId !== undefined) {
+      updateReportStatus(reportId, "failed");
+    }
   }
 }
 

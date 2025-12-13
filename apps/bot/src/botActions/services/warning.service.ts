@@ -13,18 +13,14 @@ interface CreateWarningData {
 
   type: WarningType;
   reason: string;
+  url?: string;
 }
 
-export async function createWarning(data: CreateWarningData) {
+export async function createWarning(data: CreateWarningData): Promise<number> {
   const existingWarning = await db
     .select()
     .from(warningSchema)
-    .where(
-      and(
-        eq(warningSchema.userId, data.userId),
-        eq(warningSchema.type, "warning")
-      )
-    );
+    .where(and(eq(warningSchema.userId, data.userId), eq(warningSchema.type, "warning")));
   await db.insert(warningSchema).values({
     installationId: data.installationId,
     repositoryId: data.repositoryId,
@@ -33,7 +29,8 @@ export async function createWarning(data: CreateWarningData) {
     userId: data.userId,
     type: data.type,
     reason: data.reason,
-    warningCount: existingWarning.length,
+    url: data.url,
     createdAt: new Date(),
   });
+  return existingWarning.length;
 }

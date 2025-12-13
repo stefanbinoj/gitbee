@@ -4,6 +4,7 @@ import {
   reportSchema,
   installationSchema,
   settingsSchema,
+  warningSchema,
   eq,
   and,
   inArray,
@@ -31,8 +32,8 @@ export const userRouter = new Elysia({ prefix: "/users" })
           .where(
             and(
               eq(installationSchema.senderId, accountId),
-              eq(installationSchema.isRemoved, false)
-            )
+              eq(installationSchema.isRemoved, false),
+            ),
           )
           .orderBy(desc(installationSchema.createdAt));
 
@@ -41,7 +42,7 @@ export const userRouter = new Elysia({ prefix: "/users" })
         }
 
         const installationIds = userInstallations.map(
-          (inst) => inst.installationId
+          (inst) => inst.installationId,
         );
 
         // Get reports for these installations
@@ -61,7 +62,7 @@ export const userRouter = new Elysia({ prefix: "/users" })
       params: t.Object({
         githubAccountId: t.String(),
       }),
-    }
+    },
   )
   .get(
     "/installations/:githubAccountId",
@@ -83,8 +84,8 @@ export const userRouter = new Elysia({ prefix: "/users" })
           .where(
             and(
               eq(installationSchema.senderId, accountId),
-              eq(installationSchema.isRemoved, false)
-            )
+              eq(installationSchema.isRemoved, false),
+            ),
           );
 
         return {
@@ -100,7 +101,7 @@ export const userRouter = new Elysia({ prefix: "/users" })
       params: t.Object({
         githubAccountId: t.String(),
       }),
-    }
+    },
   )
   .get(
     "/settings/:githubAccountId",
@@ -121,8 +122,8 @@ export const userRouter = new Elysia({ prefix: "/users" })
           .where(
             and(
               eq(installationSchema.senderId, accountId),
-              eq(installationSchema.isRemoved, false)
-            )
+              eq(installationSchema.isRemoved, false),
+            ),
           )
           .limit(1);
 
@@ -167,7 +168,7 @@ export const userRouter = new Elysia({ prefix: "/users" })
       params: t.Object({
         githubAccountId: t.String(),
       }),
-    }
+    },
   )
   .put(
     "/settings/:githubAccountId",
@@ -188,8 +189,8 @@ export const userRouter = new Elysia({ prefix: "/users" })
           .where(
             and(
               eq(installationSchema.senderId, accountId),
-              eq(installationSchema.isRemoved, false)
-            )
+              eq(installationSchema.isRemoved, false),
+            ),
           )
           .limit(1);
 
@@ -243,13 +244,63 @@ export const userRouter = new Elysia({ prefix: "/users" })
         autoCloseIrrelevantPRs: t.Optional(t.Boolean()),
         reviewCommentsForPRs: t.Optional(t.Boolean()),
         strictness: t.Optional(
-          t.Union([t.Literal("low"), t.Literal("medium"), t.Literal("high")])
+          t.Union([t.Literal("low"), t.Literal("medium"), t.Literal("high")]),
         ),
         responseTone: t.Optional(
-          t.Union([t.Literal("professional"), t.Literal("friendly")])
+          t.Union([t.Literal("professional"), t.Literal("friendly")]),
         ),
         moderateMembers: t.Optional(t.Boolean()),
         warningCount: t.Optional(t.Number()),
       }),
-    }
+    },
+  )
+  .get(
+    "/warnings/:githubAccountId",
+    async ({ params }) => {
+      const { githubAccountId } = params;
+
+      const accountId = parseInt(githubAccountId, 10);
+
+      if (isNaN(accountId)) {
+        return { error: "Invalid GitHub account ID" };
+      }
+
+      try {
+        // Get all installations for this user
+        const userInstallations = await db
+          .select({ installationId: installationSchema.installationId })
+          .from(installationSchema)
+          .where(
+            and(
+              eq(installationSchema.senderId, accountId),
+              eq(installationSchema.isRemoved, false),
+            ),
+          );
+
+        if (userInstallations.length === 0) {
+          return { warnings: [] };
+        }
+
+        const installationIds = userInstallations.map(
+          (inst) => inst.installationId,
+        );
+
+        // Get warnings for these installations
+        const warnings = await db
+          .select()
+          .from(warningSchema)
+          .where(inArray(warningSchema.installationId, installationIds))
+          .orderBy(desc(warningSchema.createdAt));
+
+        return { warnings };
+      } catch (error) {
+        console.error("Error fetching warnings:", error);
+        return { error: "Failed to fetch warnings" };
+      }
+    },
+    {
+      params: t.Object({
+        githubAccountId: t.String(),
+      }),
+    },
   );

@@ -65,10 +65,8 @@ const recentActivity = [
 ];
 
 export default function DashboardPage() {
-  const session = authClient.useSession();
-  console.log(session);
   const maxValue = Math.max(
-    ...weeklyData.map((d) => Math.max(d.issues, d.prs)),
+    ...weeklyData.map((d) => Math.max(d.issues, d.prs))
   );
 
   return (

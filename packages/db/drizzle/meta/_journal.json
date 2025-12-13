@@ -5,57 +5,15 @@
     {
       "idx": 0,
       "version": "7",
-      "when": 1765357930024,
-      "tag": "0000_charming_gideon",
+      "when": 1765626253090,
+      "tag": "0000_volatile_phalanx",
       "breakpoints": true
     },
     {
       "idx": 1,
       "version": "7",
-      "when": 1765453206335,
-      "tag": "0001_fancy_dragon_man",
-      "breakpoints": true
-    },
-    {
-      "idx": 2,
-      "version": "7",
-      "when": 1765512574872,
-      "tag": "0002_mean_power_pack",
-      "breakpoints": true
-    },
-    {
-      "idx": 3,
-      "version": "7",
-      "when": 1765545853636,
-      "tag": "0004_marvelous_darkhawk",
-      "breakpoints": true
-    },
-    {
-      "idx": 4,
-      "version": "7",
-      "when": 1765546206698,
-      "tag": "0005_simple_martin_li",
-      "breakpoints": true
-    },
-    {
-      "idx": 5,
-      "version": "7",
-      "when": 1765586925469,
-      "tag": "0005_lazy_dagger",
-      "breakpoints": true
-    },
-    {
-      "idx": 6,
-      "version": "7",
-      "when": 1765587737252,
-      "tag": "0006_nice_white_queen",
-      "breakpoints": true
-    },
-    {
-      "idx": 7,
-      "version": "7",
-      "when": 1765590511830,
-      "tag": "0007_silky_santa_claus",
+      "when": 1765628003706,
+      "tag": "0001_whole_psynapse",
       "breakpoints": true
     }
   ]

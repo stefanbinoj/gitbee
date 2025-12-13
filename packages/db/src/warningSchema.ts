@@ -26,7 +26,7 @@ export const warningSchema = pgTable("warnings", {
   type: warningType("type").notNull(),
   reason: text("reason").notNull(),
 
-  warningCount: integer("warning_count").default(0),
+  url: text("url"),
 
   createdAt: timestamp("created_at").notNull().defaultNow(),
 });

@@ -1,1 +1,0 @@
-ALTER TYPE "report_type" ADD VALUE 'issue_analysis';
