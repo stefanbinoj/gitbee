@@ -6,7 +6,7 @@ import { IssueQualitySystemPrompt } from "./systemPrompt/issueQuality";
 import { IssueStitcherSystemPrompt } from "./systemPrompt/issueStitcher";
 import { type finalDecisionResult, MODELS } from "./constants";
 
-interface issueCheckResult {
+export interface IssueCheckResult {
   is_valid: boolean;
   comment?: string;
 }
@@ -34,7 +34,7 @@ const IssueStateAnnotation = Annotation.Root({
 
   // Check results
   profanityResult: Annotation<profanityResult | undefined>,
-  qualityResult: Annotation<issueCheckResult | undefined>,
+  qualityResult: Annotation<IssueCheckResult | undefined>,
   duplicateResult: Annotation<duplicateCheckResult | undefined>,
 
   // Final decision
@@ -53,7 +53,7 @@ Issue Body: """${issueBody}"""`;
     const response = await aiClient(
       MODELS.CHEAP,
       prompt,
-      ProfessionalitySystemPrompt
+      ProfessionalitySystemPrompt,
     );
     const text = response.text.trim();
     const jsonMatch = text.match(/\{[\s\S]*\}/);
@@ -72,7 +72,7 @@ Issue Body: """${issueBody}"""`;
 }
 
 async function checkIssueQuality(
-  state: IssueState
+  state: IssueState,
 ): Promise<Partial<IssueState>> {
   const { issueTitle, issueBody } = state;
 
@@ -83,7 +83,7 @@ Issue Body: """${issueBody}"""`;
     const response = await aiClient(
       MODELS.CHEAP,
       prompt,
-      IssueQualitySystemPrompt
+      IssueQualitySystemPrompt,
     );
     const text = response.text.trim();
     const jsonMatch = text.match(/\{[\s\S]*\}/);
@@ -92,7 +92,7 @@ Issue Body: """${issueBody}"""`;
       return { qualityResult: { is_valid: true, comment: undefined } };
     }
 
-    const result = JSON.parse(jsonMatch[0]) as issueCheckResult;
+    const result = JSON.parse(jsonMatch[0]) as IssueCheckResult;
     console.log("Issue quality result:", result);
     return { qualityResult: result };
   } catch (error) {
@@ -102,7 +102,7 @@ Issue Body: """${issueBody}"""`;
 }
 
 async function checkDuplicates(
-  _state: IssueState
+  _state: IssueState,
 ): Promise<Partial<IssueState>> {
   // TODO : ingest issue and check for duplicates
   return {
@@ -111,7 +111,7 @@ async function checkDuplicates(
 }
 
 async function makeFinalDecision(
-  state: IssueState
+  state: IssueState,
 ): Promise<Partial<IssueState>> {
   const {
     qualityResult,
@@ -134,7 +134,7 @@ Duplicate Check Result: ${JSON.stringify(duplicateResult)}
     const response = await aiClient(
       MODELS.STANDARD,
       prompt,
-      IssueStitcherSystemPrompt
+      IssueStitcherSystemPrompt,
     );
     const text = response.text.trim();
     const jsonMatch = text.match(/\{[\s\S]*\}/);
@@ -153,7 +153,7 @@ Duplicate Check Result: ${JSON.stringify(duplicateResult)}
     console.log("Issue Final Decision:", result);
     result.final_comment = result.final_comment.replace(
       /@username/g,
-      "@" + senderLogin
+      "@" + senderLogin,
     );
     return { finalDecision: result };
   } catch (error) {

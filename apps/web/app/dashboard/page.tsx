@@ -1,19 +1,10 @@
 "use client";
+
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { authClient } from "@/lib/authClient";
-import {
-  GitBranch,
-  MessageSquare,
-  GitPullRequest,
-  Zap,
-  TrendingUp,
-  ExternalLink,
-  Key,
-  BookOpen,
-  ArrowRight,
-  Clock,
-} from "lucide-react";
+import { GitBranch, MessageSquare, GitPullRequest, Zap, TrendingUp, ExternalLink, Key, BookOpen, ArrowRight, Clock } from "lucide-react";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
 
 // Simple bar chart data
 const weeklyData = [
@@ -65,9 +56,8 @@ const recentActivity = [
 ];
 
 export default function DashboardPage() {
-  const maxValue = Math.max(
-    ...weeklyData.map((d) => Math.max(d.issues, d.prs))
-  );
+  const maxValue = Math.max(...weeklyData.map((d) => Math.max(d.issues, d.prs)));
+  const router = useRouter();
 
   return (
     <div className="space-y-6">
@@ -77,9 +67,7 @@ export default function DashboardPage() {
           <CardContent className="p-4">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-xs text-neutral-400 tracking-wider">
-                  REPOS CONNECTED
-                </p>
+                <p className="text-xs text-neutral-400 tracking-wider">REPOS CONNECTED</p>
                 <p className="text-2xl font-bold text-white font-mono">12</p>
                 <p className="text-xs text-green-500 mt-1">+2 this week</p>
               </div>
@@ -92,9 +80,7 @@ export default function DashboardPage() {
           <CardContent className="p-4">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-xs text-neutral-400 tracking-wider">
-                  ISSUES HANDLED
-                </p>
+                <p className="text-xs text-neutral-400 tracking-wider">ISSUES HANDLED</p>
                 <p className="text-2xl font-bold text-white font-mono">847</p>
                 <p className="text-xs text-green-500 mt-1">+124 this month</p>
               </div>
@@ -107,9 +93,7 @@ export default function DashboardPage() {
           <CardContent className="p-4">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-xs text-neutral-400 tracking-wider">
-                  PRS REVIEWED
-                </p>
+                <p className="text-xs text-neutral-400 tracking-wider">PRS REVIEWED</p>
                 <p className="text-2xl font-bold text-white font-mono">234</p>
                 <p className="text-xs text-green-500 mt-1">+43 this month</p>
               </div>
@@ -122,13 +106,9 @@ export default function DashboardPage() {
           <CardContent className="p-4">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-xs text-neutral-400 tracking-wider">
-                  AVG RESPONSE
-                </p>
-                <p className="text-2xl font-bold text-white font-mono">2.3s</p>
-                <p className="text-xs text-green-500 mt-1">
-                  -0.5s from last week
-                </p>
+                <p className="text-xs text-neutral-400 tracking-wider">COMMENTS ANALYZED</p>
+                <p className="text-2xl font-bold text-white font-mono">124</p>
+                <p className="text-xs text-green-500 mt-1">+124 this month</p>
               </div>
               <Zap className="w-8 h-8 text-yellow-500" />
             </div>
@@ -137,14 +117,12 @@ export default function DashboardPage() {
       </div>
 
       {/* Charts Row */}
-      <div className="grid gap-4 grid-cols-1 lg:grid-cols-7">
+      <div className="grid gap-4 grid-cols-1">
         {/* Weekly Activity Chart */}
-        <Card className="lg:col-span-4 bg-neutral-900 border-neutral-700">
+        <Card className="bg-neutral-900 border-neutral-700">
           <CardHeader>
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-              <CardTitle className="text-sm font-medium text-neutral-300 tracking-wider">
-                WEEKLY ACTIVITY
-              </CardTitle>
+              <CardTitle className="text-sm font-medium text-neutral-300 tracking-wider">WEEKLY ACTIVITY</CardTitle>
               <div className="flex items-center gap-4 text-xs">
                 <div className="flex items-center gap-2">
                   <span className="h-3 w-3 rounded-sm bg-yellow-500"></span>
@@ -160,10 +138,7 @@ export default function DashboardPage() {
           <CardContent>
             <div className="h-64 flex items-end justify-between gap-2">
               {weeklyData.map((item) => (
-                <div
-                  key={item.day}
-                  className="flex-1 flex flex-col items-center gap-2"
-                >
+                <div key={item.day} className="flex-1 flex flex-col items-center gap-2">
                   <div className="w-full flex gap-1 items-end h-48">
                     {/* Issues bar */}
                     <div
@@ -184,74 +159,6 @@ export default function DashboardPage() {
             </div>
           </CardContent>
         </Card>
-
-        {/* Response Rate Chart */}
-        <Card className="lg:col-span-3 bg-neutral-900 border-neutral-700">
-          <CardHeader>
-            <CardTitle className="text-sm font-medium text-neutral-300 tracking-wider">
-              RESPONSE RATE
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-6">
-              {/* Success Rate */}
-              <div className="space-y-2">
-                <div className="flex justify-between text-sm">
-                  <span className="text-neutral-400">Successful Responses</span>
-                  <span className="text-white font-mono">94.2%</span>
-                </div>
-                <div className="w-full bg-neutral-800 rounded-full h-3">
-                  <div
-                    className="bg-green-500 h-3 rounded-full transition-all duration-500"
-                    style={{ width: "94.2%" }}
-                  ></div>
-                </div>
-              </div>
-
-              {/* Issue Resolution */}
-              <div className="space-y-2">
-                <div className="flex justify-between text-sm">
-                  <span className="text-neutral-400">Issues Resolved</span>
-                  <span className="text-white font-mono">78.5%</span>
-                </div>
-                <div className="w-full bg-neutral-800 rounded-full h-3">
-                  <div
-                    className="bg-yellow-500 h-3 rounded-full transition-all duration-500"
-                    style={{ width: "78.5%" }}
-                  ></div>
-                </div>
-              </div>
-
-              {/* PR Approval Rate */}
-              <div className="space-y-2">
-                <div className="flex justify-between text-sm">
-                  <span className="text-neutral-400">PR Review Accuracy</span>
-                  <span className="text-white font-mono">91.8%</span>
-                </div>
-                <div className="w-full bg-neutral-800 rounded-full h-3">
-                  <div
-                    className="bg-yellow-500/70 h-3 rounded-full transition-all duration-500"
-                    style={{ width: "91.8%" }}
-                  ></div>
-                </div>
-              </div>
-
-              {/* Uptime */}
-              <div className="space-y-2">
-                <div className="flex justify-between text-sm">
-                  <span className="text-neutral-400">System Uptime</span>
-                  <span className="text-white font-mono">99.9%</span>
-                </div>
-                <div className="w-full bg-neutral-800 rounded-full h-3">
-                  <div
-                    className="bg-green-500 h-3 rounded-full transition-all duration-500"
-                    style={{ width: "99.9%" }}
-                  ></div>
-                </div>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
       </div>
 
       {/* Bottom Row */}
@@ -265,46 +172,28 @@ export default function DashboardPage() {
                   <Clock className="w-5 h-5 text-yellow-500" />
                 </div>
                 <div>
-                  <CardTitle className="text-sm font-medium text-neutral-300 tracking-wider uppercase">
-                    Recent Activity
-                  </CardTitle>
+                  <CardTitle className="text-sm font-medium text-neutral-300 tracking-wider uppercase">Recent Activity</CardTitle>
                 </div>
               </div>
-              <Button
-                variant="ghost"
-                size="sm"
-                className="text-neutral-400 hover:text-white hover:bg-neutral-800 h-7 text-xs"
-              >
+              <Link className="text-neutral-400 hover:text-white hover:bg-neutral-800 h-7 text-xs cursor-pointer flex" href="/dashboard/logs">
                 View All
                 <ArrowRight className="w-3 h-3 ml-1" />
-              </Button>
+              </Link>
             </div>
           </CardHeader>
           <CardContent className="p-0 flex-1">
             <div className="divide-y divide-neutral-800">
               {recentActivity.map((activity) => (
-                <div
-                  key={activity.id}
-                  className="flex items-center gap-4 p-4 hover:bg-neutral-800/30 transition-colors group cursor-default"
-                >
+                <div key={activity.id} className="flex items-center gap-4 p-4 hover:bg-neutral-800/30 transition-colors group cursor-default">
                   <div
-                    className={`h-8 w-8 rounded flex items-center justify-center shrink-0 border ${
-                      activity.type === "issue"
-                        ? "bg-blue-500/10 border-blue-500/20 text-blue-500"
-                        : "bg-purple-500/10 border-purple-500/20 text-purple-500"
-                    }`}
+                    className={`h-8 w-8 rounded flex items-center justify-center shrink-0 border ${activity.type === "issue" ? "bg-blue-500/10 border-blue-500/20 text-blue-500" : "bg-purple-500/10 border-purple-500/20 text-purple-500"
+                      }`}
                   >
-                    {activity.type === "issue" ? (
-                      <MessageSquare className="w-4 h-4" />
-                    ) : (
-                      <GitPullRequest className="w-4 h-4" />
-                    )}
+                    {activity.type === "issue" ? <MessageSquare className="w-4 h-4" /> : <GitPullRequest className="w-4 h-4" />}
                   </div>
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 mb-0.5">
-                      <span className="text-sm font-medium text-neutral-200 truncate group-hover:text-yellow-500 transition-colors">
-                        {activity.title}
-                      </span>
+                      <span className="text-sm font-medium text-neutral-200 truncate group-hover:text-yellow-500 transition-colors">{activity.title}</span>
                       <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-neutral-800 text-neutral-400 border border-neutral-700">
                         #{140 + activity.id}
                       </span>
@@ -316,11 +205,7 @@ export default function DashboardPage() {
                     </p>
                   </div>
                   <div className="opacity-0 group-hover:opacity-100 transition-opacity">
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="h-7 w-7 text-neutral-400 hover:text-white"
-                    >
+                    <Button variant="ghost" size="icon" className="h-7 w-7 text-neutral-400 hover:text-white">
                       <ExternalLink className="w-3.5 h-3.5" />
                     </Button>
                   </div>
@@ -333,55 +218,49 @@ export default function DashboardPage() {
         {/* Quick Actions */}
         <Card className="bg-neutral-900 border-neutral-700 flex flex-col">
           <CardHeader className="border-b border-neutral-800 pb-4">
-            <CardTitle className="text-sm font-medium text-neutral-300 tracking-wider">
-              QUICK ACTIONS
-            </CardTitle>
+            <CardTitle className="text-sm font-medium text-neutral-300 tracking-wider">QUICK ACTIONS</CardTitle>
           </CardHeader>
           <CardContent className="p-6">
             <div className="grid grid-cols-2 gap-4">
               <Button
                 variant="outline"
-                className="h-auto p-4 flex flex-col items-center gap-3 border-neutral-800 bg-neutral-900/50 text-neutral-300 hover:bg-neutral-800 hover:text-yellow-500 hover:border-yellow-500/30 transition-all duration-300 group"
+                className="h-auto p-4 flex flex-col items-center gap-3 border-neutral-800 bg-neutral-900/50 text-neutral-300 hover:bg-neutral-800 hover:text-yellow-500 hover:border-yellow-500/30 transition-all duration-300 group cursor-pointer"
+                onClick={() => router.push("/dashboard/integrations")}
               >
                 <div className="p-3 rounded-full bg-neutral-800 group-hover:bg-yellow-500/10 transition-colors">
                   <GitBranch className="w-5 h-5 group-hover:text-yellow-500" />
                 </div>
-                <span className="text-xs font-medium tracking-wide uppercase">
-                  Connect Repo
-                </span>
+                <span className="text-xs font-medium tracking-wide uppercase">Connect Repo</span>
               </Button>
               <Button
                 variant="outline"
-                className="h-auto p-4 flex flex-col items-center gap-3 border-neutral-800 bg-neutral-900/50 text-neutral-300 hover:bg-neutral-800 hover:text-yellow-500 hover:border-yellow-500/30 transition-all duration-300 group"
+                className="h-auto p-4 flex flex-col items-center gap-3 border-neutral-800 bg-neutral-900/50 text-neutral-300 hover:bg-neutral-800 hover:text-yellow-500 hover:border-yellow-500/30 transition-all duration-300 group cursor-pointer"
+                onClick={() => router.push("/dashboard/docs")}
               >
                 <div className="p-3 rounded-full bg-neutral-800 group-hover:bg-yellow-500/10 transition-colors">
                   <BookOpen className="w-5 h-5 group-hover:text-yellow-500" />
                 </div>
-                <span className="text-xs font-medium tracking-wide uppercase">
-                  View Docs
-                </span>
+                <span className="text-xs font-medium tracking-wide uppercase">View Docs</span>
               </Button>
               <Button
                 variant="outline"
-                className="h-auto p-4 flex flex-col items-center gap-3 border-neutral-800 bg-neutral-900/50 text-neutral-300 hover:bg-neutral-800 hover:text-yellow-500 hover:border-yellow-500/30 transition-all duration-300 group"
+                className="h-auto p-4 flex flex-col items-center gap-3 border-neutral-800 bg-neutral-900/50 text-neutral-300 hover:bg-neutral-800 hover:text-yellow-500 hover:border-yellow-500/30 transition-all duration-300 group cursor-pointer"
+                onClick={() => router.push("/dashboard/api-keys")}
               >
                 <div className="p-3 rounded-full bg-neutral-800 group-hover:bg-yellow-500/10 transition-colors">
                   <Key className="w-5 h-5 group-hover:text-yellow-500" />
                 </div>
-                <span className="text-xs font-medium tracking-wide uppercase">
-                  API Keys
-                </span>
+                <span className="text-xs font-medium tracking-wide uppercase">API Keys</span>
               </Button>
               <Button
+                onClick={() => window.open("https://github.com/apps/gitbeeai", "_blank", "noopener,noreferrer")}
                 variant="outline"
-                className="h-auto p-4 flex flex-col items-center gap-3 border-neutral-800 bg-neutral-900/50 text-neutral-300 hover:bg-neutral-800 hover:text-yellow-500 hover:border-yellow-500/30 transition-all duration-300 group"
+                className="h-auto p-4 flex flex-col items-center gap-3 border-neutral-800 bg-neutral-900/50 text-neutral-300 hover:bg-neutral-800 hover:text-yellow-500 hover:border-yellow-500/30 transition-all duration-300 group cursor-pointer"
               >
                 <div className="p-3 rounded-full bg-neutral-800 group-hover:bg-yellow-500/10 transition-colors">
                   <ExternalLink className="w-5 h-5 group-hover:text-yellow-500" />
                 </div>
-                <span className="text-xs font-medium tracking-wide uppercase">
-                  GitHub App
-                </span>
+                <span className="text-xs font-medium tracking-wide uppercase">GitHub App</span>
               </Button>
             </div>
 
@@ -392,12 +271,9 @@ export default function DashboardPage() {
                   <TrendingUp className="w-4 h-4 text-yellow-500" />
                 </div>
                 <div>
-                  <p className="text-sm font-medium text-yellow-500 mb-1">
-                    Performance Tip
-                  </p>
+                  <p className="text-sm font-medium text-yellow-500 mb-1">Performance Tip</p>
                   <p className="text-xs text-neutral-400 leading-relaxed">
-                    Add more documentation to your knowledge base to improve
-                    GitBee's response accuracy by up to{" "}
+                    Add more documentation to your knowledge base to improve' GitBee's response accuracy by up to{" "}
                     <span className="text-white font-bold">40%</span>.
                   </p>
                 </div>

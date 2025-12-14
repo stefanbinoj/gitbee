@@ -35,12 +35,8 @@ export default function IntegrationsPage() {
             <Puzzle className="w-5 h-5 text-yellow-500" />
           </div>
           <div>
-            <h2 className="text-lg font-medium text-neutral-300 tracking-wide">
-              INTEGRATIONS
-            </h2>
-            <p className="text-sm text-neutral-400">
-              Connect GitBee with your favorite tools and services
-            </p>
+            <h2 className="text-lg font-medium text-neutral-300 tracking-wide">INTEGRATIONS</h2>
+            <p className="text-sm text-neutral-400">Connect GitBee with your favorite tools and services</p>
           </div>
         </div>
       </div>
@@ -59,29 +55,25 @@ export default function IntegrationsPage() {
               </div>
             </div>
             <div className="flex-1 text-center md:text-left space-y-1">
-              <CardTitle className="text-lg font-semibold text-white">
-                GitHub
-              </CardTitle>
+              <CardTitle className="text-lg font-semibold text-white">GitHub</CardTitle>
               <CardDescription className="text-neutral-400 text-sm md:text-base">
-                Connect your GitHub repositories to enable automated code
-                reviews and issue moderation.
+                Connect your GitHub repositories to enable automated code reviews and issue moderation.
               </CardDescription>
             </div>
             <div className="flex-shrink-0 w-full md:w-auto min-w-[140px]">
               {isGitHubConnected ? (
                 <Button
                   variant="outline"
-                  className="w-full border-green-500/20 text-green-500 hover:bg-green-500/10 hover:text-green-400 bg-green-500/10 h-11"
+                  className="w-full border-green-500/20 text-green-500 hover:bg-green-500/10 hover:text-green-400 bg-green-500/10 h-11 cursor-pointer"
+                  onClick={() => window.open("https://github.com/apps/gitbeeai", "_blank", "noopener,noreferrer")}
                 >
                   <Check className="w-4 h-4 mr-2" />
-                  Connected
+                  Configure
                 </Button>
               ) : (
                 <Button
                   className="w-full bg-white hover:bg-neutral-200 text-black h-11 transition-colors font-medium cursor-pointer"
-                  onClick={() => {
-                    window.location.href = "https://github.com/apps/gitbeeai";
-                  }}
+                  onClick={() => window.open("https://github.com/apps/gitbeeai", "_blank", "noopener,noreferrer")}
                 >
                   Connect
                 </Button>
@@ -95,20 +87,13 @@ export default function IntegrationsPage() {
           <div className="flex flex-col md:flex-row items-center p-6 gap-6">
             <div className="flex-shrink-0">
               <div className="h-16 w-16 flex items-center justify-center bg-white rounded-xl p-3 shadow-sm">
-                <img
-                  src="https://upload.wikimedia.org/wikipedia/commons/d/d5/Slack_icon_2019.svg"
-                  alt="Slack logo"
-                  className="w-full h-full object-contain"
-                />
+                <img src="https://upload.wikimedia.org/wikipedia/commons/d/d5/Slack_icon_2019.svg" alt="Slack logo" className="w-full h-full object-contain" />
               </div>
             </div>
             <div className="flex-1 text-center md:text-left space-y-1">
-              <CardTitle className="text-lg font-semibold text-white">
-                Slack
-              </CardTitle>
+              <CardTitle className="text-lg font-semibold text-white">Slack</CardTitle>
               <CardDescription className="text-neutral-400 text-sm md:text-base">
-                Receive notifications and updates directly in your team's Slack
-                channels.
+                Receive notifications and updates directly in your team's Slack channels.
               </CardDescription>
             </div>
             <div className="flex-shrink-0 w-full md:w-auto min-w-[140px]">
@@ -127,20 +112,13 @@ export default function IntegrationsPage() {
           <div className="flex flex-col md:flex-row items-center p-6 gap-6">
             <div className="flex-shrink-0">
               <div className="h-16 w-16 flex items-center justify-center bg-white rounded-xl p-3 shadow-sm">
-                <img
-                  src="https://upload.wikimedia.org/wikipedia/commons/8/8a/Jira_Logo.svg"
-                  alt="Jira logo"
-                  className="w-full h-full object-contain"
-                />
+                <img src="https://upload.wikimedia.org/wikipedia/commons/8/8a/Jira_Logo.svg" alt="Jira logo" className="w-full h-full object-contain" />
               </div>
             </div>
             <div className="flex-1 text-center md:text-left space-y-1">
-              <CardTitle className="text-lg font-semibold text-white">
-                Jira
-              </CardTitle>
+              <CardTitle className="text-lg font-semibold text-white">Jira</CardTitle>
               <CardDescription className="text-neutral-400 text-sm md:text-base">
-                Sync issues and create tickets automatically from GitHub
-                activity.
+                Sync issues and create tickets automatically from GitHub activity.
               </CardDescription>
             </div>
             <div className="flex-shrink-0 w-full md:w-auto min-w-[140px]">
@@ -167,12 +145,9 @@ export default function IntegrationsPage() {
               </div>
             </div>
             <div className="flex-1 text-center md:text-left space-y-1">
-              <CardTitle className="text-lg font-semibold text-white">
-                Linear
-              </CardTitle>
+              <CardTitle className="text-lg font-semibold text-white">Linear</CardTitle>
               <CardDescription className="text-neutral-400 text-sm md:text-base">
-                Streamline your issue tracking and project management with
-                two-way sync.
+                Streamline your issue tracking and project management with two-way sync.
               </CardDescription>
             </div>
             <div className="flex-shrink-0 w-full md:w-auto min-w-[140px]">
