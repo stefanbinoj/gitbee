@@ -3,6 +3,7 @@ import {
   db,
   reportSchema,
   installationSchema,
+  installationRepositoriesSchema,
   settingsSchema,
   warningSchema,
   rulesSchema,
@@ -10,6 +11,9 @@ import {
   and,
   inArray,
   desc,
+  gte,
+  lt,
+  count,
 } from "@gitbee/db";
 
 export const userRouter = new Elysia({ prefix: "/users" })
@@ -565,6 +569,371 @@ export const userRouter = new Elysia({ prefix: "/users" })
       params: t.Object({
         githubAccountId: t.String(),
         ruleId: t.String(),
+      }),
+    },
+  )
+  .get(
+    "/dashboard/:githubAccountId",
+    async ({ params }) => {
+      const { githubAccountId } = params;
+
+      const accountId = parseInt(githubAccountId, 10);
+
+      if (isNaN(accountId)) {
+        return { error: "Invalid GitHub account ID" };
+      }
+
+      try {
+        // Get all installations for this user
+        const userInstallations = await db
+          .select({
+            installationId: installationSchema.installationId,
+            targetId: installationSchema.targetId,
+          })
+          .from(installationSchema)
+          .where(
+            and(
+              eq(installationSchema.senderId, accountId),
+              eq(installationSchema.isRemoved, false),
+            ),
+          );
+
+        if (userInstallations.length === 0) {
+          return {
+            isInstalled: false,
+            stats: {
+              reposConnected: 0,
+              reposChange: 0,
+              issuesHandled: 0,
+              issuesChange: 0,
+              prsReviewed: 0,
+              prsChange: 0,
+              warningsIssued: 0,
+              warningsChange: 0,
+            },
+            weeklyData: [],
+            recentActivity: [],
+          };
+        }
+
+        const installationIds = userInstallations.map(
+          (inst) => inst.installationId,
+        );
+        const targetIds = userInstallations.map((inst) => inst.targetId);
+
+        // Date calculations
+        const now = new Date();
+        const sevenDaysAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+        const fourteenDaysAgo = new Date(
+          now.getTime() - 14 * 24 * 60 * 60 * 1000,
+        );
+
+        // Get repos count (current)
+        const reposResult = await db
+          .select({ count: count() })
+          .from(installationRepositoriesSchema)
+          .where(
+            and(
+              inArray(installationRepositoriesSchema.targetId, targetIds),
+              eq(installationRepositoriesSchema.isRemoved, false),
+            ),
+          );
+        const reposConnected = reposResult[0]?.count ?? 0;
+
+        // Get repos added in last 7 days
+        const reposThisWeek = await db
+          .select({ count: count() })
+          .from(installationRepositoriesSchema)
+          .where(
+            and(
+              inArray(installationRepositoriesSchema.targetId, targetIds),
+              eq(installationRepositoriesSchema.isRemoved, false),
+              gte(installationRepositoriesSchema.addedAt, sevenDaysAgo),
+            ),
+          );
+
+        // Get repos added in previous 7 days (7-14 days ago)
+        const reposLastWeek = await db
+          .select({ count: count() })
+          .from(installationRepositoriesSchema)
+          .where(
+            and(
+              inArray(installationRepositoriesSchema.targetId, targetIds),
+              eq(installationRepositoriesSchema.isRemoved, false),
+              gte(installationRepositoriesSchema.addedAt, fourteenDaysAgo),
+              lt(installationRepositoriesSchema.addedAt, sevenDaysAgo),
+            ),
+          );
+
+        // Calculate % change for repos
+        const reposThisWeekCount = reposThisWeek[0]?.count ?? 0;
+        const reposLastWeekCount = reposLastWeek[0]?.count ?? 0;
+        const reposChange =
+          reposLastWeekCount === 0
+            ? reposThisWeekCount > 0
+              ? 100
+              : 0
+            : Math.round(
+                ((reposThisWeekCount - reposLastWeekCount) /
+                  reposLastWeekCount) *
+                  100,
+              );
+
+        // Get issues handled (issue_analysis reports)
+        const issuesTotal = await db
+          .select({ count: count() })
+          .from(reportSchema)
+          .where(
+            and(
+              inArray(reportSchema.installationId, installationIds),
+              eq(reportSchema.reportType, "issue_analysis"),
+            ),
+          );
+        const issuesHandled = issuesTotal[0]?.count ?? 0;
+
+        const issuesThisWeek = await db
+          .select({ count: count() })
+          .from(reportSchema)
+          .where(
+            and(
+              inArray(reportSchema.installationId, installationIds),
+              eq(reportSchema.reportType, "issue_analysis"),
+              gte(reportSchema.createdAt, sevenDaysAgo),
+            ),
+          );
+
+        const issuesLastWeek = await db
+          .select({ count: count() })
+          .from(reportSchema)
+          .where(
+            and(
+              inArray(reportSchema.installationId, installationIds),
+              eq(reportSchema.reportType, "issue_analysis"),
+              gte(reportSchema.createdAt, fourteenDaysAgo),
+              lt(reportSchema.createdAt, sevenDaysAgo),
+            ),
+          );
+
+        const issuesThisWeekCount = issuesThisWeek[0]?.count ?? 0;
+        const issuesLastWeekCount = issuesLastWeek[0]?.count ?? 0;
+        const issuesChange =
+          issuesLastWeekCount === 0
+            ? issuesThisWeekCount > 0
+              ? 100
+              : 0
+            : Math.round(
+                ((issuesThisWeekCount - issuesLastWeekCount) /
+                  issuesLastWeekCount) *
+                  100,
+              );
+
+        // Get PRs reviewed (pr_analysis reports)
+        const prsTotal = await db
+          .select({ count: count() })
+          .from(reportSchema)
+          .where(
+            and(
+              inArray(reportSchema.installationId, installationIds),
+              eq(reportSchema.reportType, "pr_analysis"),
+            ),
+          );
+        const prsReviewed = prsTotal[0]?.count ?? 0;
+
+        const prsThisWeek = await db
+          .select({ count: count() })
+          .from(reportSchema)
+          .where(
+            and(
+              inArray(reportSchema.installationId, installationIds),
+              eq(reportSchema.reportType, "pr_analysis"),
+              gte(reportSchema.createdAt, sevenDaysAgo),
+            ),
+          );
+
+        const prsLastWeek = await db
+          .select({ count: count() })
+          .from(reportSchema)
+          .where(
+            and(
+              inArray(reportSchema.installationId, installationIds),
+              eq(reportSchema.reportType, "pr_analysis"),
+              gte(reportSchema.createdAt, fourteenDaysAgo),
+              lt(reportSchema.createdAt, sevenDaysAgo),
+            ),
+          );
+
+        const prsThisWeekCount = prsThisWeek[0]?.count ?? 0;
+        const prsLastWeekCount = prsLastWeek[0]?.count ?? 0;
+        const prsChange =
+          prsLastWeekCount === 0
+            ? prsThisWeekCount > 0
+              ? 100
+              : 0
+            : Math.round(
+                ((prsThisWeekCount - prsLastWeekCount) / prsLastWeekCount) *
+                  100,
+              );
+
+        // Get warnings issued
+        const warningsTotal = await db
+          .select({ count: count() })
+          .from(warningSchema)
+          .where(inArray(warningSchema.installationId, installationIds));
+        const warningsIssued = warningsTotal[0]?.count ?? 0;
+
+        const warningsThisWeek = await db
+          .select({ count: count() })
+          .from(warningSchema)
+          .where(
+            and(
+              inArray(warningSchema.installationId, installationIds),
+              gte(warningSchema.createdAt, sevenDaysAgo),
+            ),
+          );
+
+        const warningsLastWeek = await db
+          .select({ count: count() })
+          .from(warningSchema)
+          .where(
+            and(
+              inArray(warningSchema.installationId, installationIds),
+              gte(warningSchema.createdAt, fourteenDaysAgo),
+              lt(warningSchema.createdAt, sevenDaysAgo),
+            ),
+          );
+
+        const warningsThisWeekCount = warningsThisWeek[0]?.count ?? 0;
+        const warningsLastWeekCount = warningsLastWeek[0]?.count ?? 0;
+        const warningsChange =
+          warningsLastWeekCount === 0
+            ? warningsThisWeekCount > 0
+              ? 100
+              : 0
+            : Math.round(
+                ((warningsThisWeekCount - warningsLastWeekCount) /
+                  warningsLastWeekCount) *
+                  100,
+              );
+
+        // Get weekly data (rolling 7 days)
+        const weeklyData: Array<{
+          day: string;
+          date: string;
+          issues: number;
+          prs: number;
+        }> = [];
+
+        const dayNames = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+
+        for (let i = 6; i >= 0; i--) {
+          const dayStart = new Date(now);
+          dayStart.setDate(now.getDate() - i);
+          dayStart.setHours(0, 0, 0, 0);
+
+          const dayEnd = new Date(dayStart);
+          dayEnd.setHours(23, 59, 59, 999);
+
+          const dayIssues = await db
+            .select({ count: count() })
+            .from(reportSchema)
+            .where(
+              and(
+                inArray(reportSchema.installationId, installationIds),
+                eq(reportSchema.reportType, "issue_analysis"),
+                gte(reportSchema.createdAt, dayStart),
+                lt(reportSchema.createdAt, dayEnd),
+              ),
+            );
+
+          const dayPrs = await db
+            .select({ count: count() })
+            .from(reportSchema)
+            .where(
+              and(
+                inArray(reportSchema.installationId, installationIds),
+                eq(reportSchema.reportType, "pr_analysis"),
+                gte(reportSchema.createdAt, dayStart),
+                lt(reportSchema.createdAt, dayEnd),
+              ),
+            );
+
+          weeklyData.push({
+            day: dayNames[dayStart.getDay()],
+            date: dayStart.toISOString().split("T")[0],
+            issues: dayIssues[0]?.count ?? 0,
+            prs: dayPrs[0]?.count ?? 0,
+          });
+        }
+
+        // Get recent activity (last 5 issue/pr analysis reports)
+        const recentReports = await db
+          .select()
+          .from(reportSchema)
+          .where(
+            and(
+              inArray(reportSchema.installationId, installationIds),
+              inArray(reportSchema.reportType, [
+                "issue_analysis",
+                "pr_analysis",
+              ]),
+            ),
+          )
+          .orderBy(desc(reportSchema.createdAt))
+          .limit(5);
+
+        const recentActivity = recentReports.map((report) => {
+          const createdAt = new Date(report.createdAt);
+          const diffMs = now.getTime() - createdAt.getTime();
+          const diffMins = Math.floor(diffMs / 60000);
+          const diffHours = Math.floor(diffMs / 3600000);
+          const diffDays = Math.floor(diffMs / 86400000);
+
+          let timeAgo: string;
+          if (diffMins < 1) {
+            timeAgo = "Just now";
+          } else if (diffMins < 60) {
+            timeAgo = `${diffMins} min ago`;
+          } else if (diffHours < 24) {
+            timeAgo = `${diffHours} hour${diffHours > 1 ? "s" : ""} ago`;
+          } else {
+            timeAgo = `${diffDays} day${diffDays > 1 ? "s" : ""} ago`;
+          }
+
+          const isIssue = report.reportType === "issue_analysis";
+
+          return {
+            id: report.id,
+            type: isIssue ? ("issue" as const) : ("pr" as const),
+            title: isIssue ? `Responded to issue` : `Reviewed PR`,
+            repo: report.repositoryFullName,
+            time: timeAgo,
+            url: report.url,
+          };
+        });
+
+        return {
+          isInstalled: true,
+          stats: {
+            reposConnected,
+            reposChange,
+            issuesHandled,
+            issuesChange,
+            prsReviewed,
+            prsChange,
+            warningsIssued,
+            warningsChange,
+          },
+          weeklyData,
+          recentActivity,
+        };
+      } catch (error) {
+        console.error("Error fetching dashboard data:", error);
+        return { error: "Failed to fetch dashboard data" };
+      }
+    },
+    {
+      params: t.Object({
+        githubAccountId: t.String(),
       }),
     },
   );

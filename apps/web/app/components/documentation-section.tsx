@@ -1,71 +1,76 @@
-"use client"
+"use client";
 
-import { useState, useEffect } from "react"
-import type React from "react"
+import { useState, useEffect } from "react";
+import type React from "react";
 
 // Badge component for consistency
 function Badge({ icon, text }: { icon: React.ReactNode; text: string }) {
   return (
-    <div className="px-[14px] py-[6px] bg-white shadow-[0px_0px_0px_4px_rgba(55,50,47,0.05)] overflow-hidden rounded-[90px] flex justify-start items-center gap-[8px] border border-[rgba(2,6,23,0.08)] shadow-xs">
-      <div className="w-[14px] h-[14px] relative overflow-hidden flex items-center justify-center">{icon}</div>
-      <div className="text-center flex justify-center flex-col text-[#37322F] text-xs font-medium leading-3 font-sans">
+    <div className="px-[14px] py-[6px] bg-[#1a1a1a] shadow-[0px_0px_0px_4px_rgba(255,255,255,0.05)] overflow-hidden rounded-[90px] flex justify-start items-center gap-[8px] border border-[rgba(255,255,255,0.1)] shadow-xs">
+      <div className="w-[14px] h-[14px] relative overflow-hidden flex items-center justify-center">
+        {icon}
+      </div>
+      <div className="text-center flex justify-center flex-col text-[#e5e5e5] text-xs font-medium leading-3 font-sans">
         {text}
       </div>
     </div>
-  )
+  );
 }
 
 export default function DocumentationSection() {
-  const [activeCard, setActiveCard] = useState(0)
-  const [animationKey, setAnimationKey] = useState(0)
+  const [activeCard, setActiveCard] = useState(0);
+  const [animationKey, setAnimationKey] = useState(0);
 
   const cards = [
     {
       title: "Issue monitoring",
-      description: "Get instant Slack notifications when new\nissues are created in your repositories.",
+      description:
+        "Get instant Slack notifications when new\nissues are created in your repositories.",
       image: "/modern-dashboard-interface-with-data-visualization.jpg",
     },
     {
       title: "PR relevance filter",
-      description: "Automatically close irrelevant or spam PRs\nthat don't align with your project scope.",
+      description:
+        "Automatically close irrelevant or spam PRs\nthat don't align with your project scope.",
       image: "/analytics-dashboard.png",
     },
     {
-      title: "Conduct enforcement",
-      description: "Maintain professionalism with warnings.\nBlock users after 3+ guideline violations.",
+      title: "Multiple integrations",
+      description:
+        "Connect your GitHub repositories to enable automated code reviews and issue moderation.",
       image: "/team-collaboration-interface-with-shared-workspace.jpg",
     },
-  ]
+  ];
 
   useEffect(() => {
     const interval = setInterval(() => {
-      setActiveCard((prev) => (prev + 1) % cards.length)
-      setAnimationKey((prev) => prev + 1)
-    }, 5000)
+      setActiveCard((prev) => (prev + 1) % cards.length);
+      setAnimationKey((prev) => prev + 1);
+    }, 5000);
 
-    return () => clearInterval(interval)
-  }, [cards.length])
+    return () => clearInterval(interval);
+  }, [cards.length]);
 
   const handleCardClick = (index: number) => {
-    setActiveCard(index)
-    setAnimationKey((prev) => prev + 1)
-  }
+    setActiveCard(index);
+    setAnimationKey((prev) => prev + 1);
+  };
 
   return (
-    <div className="w-full border-b border-[rgba(55,50,47,0.12)] flex flex-col justify-center items-center">
+    <div className="w-full border-b border-[rgba(255,255,255,0.08)] flex flex-col justify-center items-center">
       {/* Header Section */}
-      <div className="self-stretch px-6 md:px-24 py-12 md:py-16 border-b border-[rgba(55,50,47,0.12)] flex justify-center items-center gap-6">
-        <div className="w-full max-w-[586px] px-6 py-5 shadow-[0px_2px_4px_rgba(50,45,43,0.06)] overflow-hidden rounded-lg flex flex-col justify-start items-center gap-4 shadow-none">
+      <div className="self-stretch px-6 md:px-24 py-12 md:py-16 border-b border-[rgba(255,255,255,0.08)] flex justify-center items-center gap-6">
+        <div className="w-full max-w-[586px] px-6 py-5 shadow-[0px_2px_4px_rgba(0,0,0,0.3)] overflow-hidden rounded-lg flex flex-col justify-start items-center gap-4 shadow-none">
           <Badge
             icon={
-              <div className="w-[10.50px] h-[10.50px] outline outline-[1.17px] outline-[#37322F] outline-offset-[-0.58px] rounded-full"></div>
+              <div className="w-[10.50px] h-[10.50px] outline outline-[1.17px] outline-[#ffffff] outline-offset-[-0.58px] rounded-full"></div>
             }
             text="How It Works"
           />
-          <div className="self-stretch text-center flex justify-center flex-col text-[#49423D] text-3xl md:text-5xl font-semibold leading-tight md:leading-[60px] font-sans tracking-tight">
+          <div className="self-stretch text-center flex justify-center flex-col text-[#ffffff] text-3xl md:text-5xl font-semibold leading-tight md:leading-[60px] font-sans tracking-tight">
             Keep your community healthy
           </div>
-          <div className="self-stretch text-center text-[#605A57] text-base font-normal leading-7 font-sans">
+          <div className="self-stretch text-center text-[rgba(255,255,255,0.70)] text-base font-normal leading-7 font-sans">
             Monitor issues, filter spam PRs, and enforce community guidelines
             <br />
             all from a single intelligent platform.
@@ -79,7 +84,7 @@ export default function DocumentationSection() {
           {/* Left Column - Feature Cards */}
           <div className="w-full md:w-auto md:max-w-[400px] flex flex-col justify-center items-center gap-4 order-2 md:order-1">
             {cards.map((card, index) => {
-              const isActive = index === activeCard
+              const isActive = index === activeCard;
 
               return (
                 <div
@@ -87,41 +92,43 @@ export default function DocumentationSection() {
                   onClick={() => handleCardClick(index)}
                   className={`w-full overflow-hidden flex flex-col justify-start items-start transition-all duration-300 cursor-pointer ${
                     isActive
-                      ? "bg-white shadow-[0px_0px_0px_0.75px_#E0DEDB_inset]"
-                      : "border border-[rgba(2,6,23,0.08)]"
+                      ? "bg-[#0a0a0a] shadow-[0px_0px_0px_0.75px_rgba(255,255,255,0.15)_inset]"
+                      : "border border-[rgba(255,255,255,0.1)]"
                   }`}
                 >
                   <div
-                    className={`w-full h-0.5 bg-[rgba(50,45,43,0.08)] overflow-hidden ${isActive ? "opacity-100" : "opacity-0"}`}
+                    className={`w-full h-0.5 bg-[rgba(255,255,255,0.1)] overflow-hidden ${isActive ? "opacity-100" : "opacity-0"}`}
                   >
                     <div
                       key={animationKey}
-                      className="h-0.5 bg-[#322D2B] animate-[progressBar_5s_linear_forwards] will-change-transform"
+                      className="h-0.5 bg-[#eab308] animate-[progressBar_5s_linear_forwards] will-change-transform"
                     />
                   </div>
                   <div className="px-6 py-5 w-full flex flex-col gap-2">
-                    <div className="self-stretch flex justify-center flex-col text-[#49423D] text-sm font-semibold leading-6 font-sans">
+                    <div
+                      className={`self-stretch flex justify-center flex-col ${isActive ? "text-[#eab308]" : "text-[#ffffff]"} text-sm font-semibold leading-6 font-sans transition-colors`}
+                    >
                       {card.title}
                     </div>
-                    <div className="self-stretch text-[#605A57] text-[13px] font-normal leading-[22px] font-sans whitespace-pre-line">
+                    <div className="self-stretch text-[rgba(255,255,255,0.70)] text-[13px] font-normal leading-[22px] font-sans whitespace-pre-line">
                       {card.description}
                     </div>
                   </div>
                 </div>
-              )
+              );
             })}
           </div>
 
           {/* Right Column - Image */}
           <div className="w-full md:w-auto rounded-lg flex flex-col justify-center items-center gap-2 order-1 md:order-2 md:px-0 px-[00]">
-            <div className="w-full md:w-[580px] h-[250px] md:h-[420px] bg-white shadow-[0px_0px_0px_0.9056603908538818px_rgba(0,0,0,0.08)] overflow-hidden rounded-lg flex flex-col justify-start items-start">
+            <div className="w-full md:w-[580px] h-[250px] md:h-[420px] bg-[#0a0a0a] shadow-[0px_0px_0px_0.9056603908538818px_rgba(255,255,255,0.08)] overflow-hidden rounded-lg flex flex-col justify-start items-start border border-[rgba(255,255,255,0.08)]">
               <div
                 className={`w-full h-full transition-all duration-300 ${
                   activeCard === 0
-                    ? "bg-gradient-to-br from-blue-50 to-blue-100"
+                    ? "bg-gradient-to-br from-blue-950 to-blue-900"
                     : activeCard === 1
-                      ? "bg-gradient-to-br from-purple-50 to-purple-100"
-                      : "bg-gradient-to-br from-green-50 to-green-100"
+                      ? "bg-gradient-to-br from-purple-950 to-purple-900"
+                      : "bg-gradient-to-br from-green-950 to-green-900"
                 }`}
               />
             </div>
@@ -140,5 +147,5 @@ export default function DocumentationSection() {
         }
       `}</style>
     </div>
-  )
+  );
 }

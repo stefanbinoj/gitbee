@@ -1,72 +1,36 @@
-import type React from "react"
+import type React from "react";
 
 interface YourWorkInSyncProps {
   /** Fixed width from Figma: 482px */
-  width?: number | string
+  width?: number | string;
   /** Fixed height from Figma: 300px */
-  height?: number | string
+  height?: number | string;
   /** Optional className to pass to root */
-  className?: string
+  className?: string;
   /** Theme palette */
-  theme?: "light" | "dark"
+  theme?: "light" | "dark";
 }
 
 /**
- * Your work, in sync – Chat conversation UI
- * Generated from Figma via MCP with exact measurements (482×300px)
- * Single-file component following the v0-ready pattern used in this repo.
+ * Your work, in sync – PR Review conversation UI for GitBee
+ * Shows automated PR filtering and moderation in action
  */
 const YourWorkInSync: React.FC<YourWorkInSyncProps> = ({
   width = 482,
   height = 300,
   className = "",
-  theme = "dark",
 }) => {
-  // Design tokens (derived from Figma local variables)
-  const themeVars =
-    theme === "light"
-      ? {
-          "--yws-surface": "#ffffff",
-          "--yws-text-primary": "#37322f",
-          "--yws-text-secondary": "#6b7280",
-          "--yws-bubble-light": "#e8e5e3",
-          "--yws-bubble-dark": "#37322f",
-          "--yws-bubble-white": "#ffffff",
-          "--yws-border": "rgba(0,0,0,0.08)",
-          "--yws-shadow": "rgba(0,0,0,0.08)",
-        }
-      : ({
-          "--yws-surface": "#1f2937",
-          "--yws-text-primary": "#f9fafb",
-          "--yws-text-secondary": "#d1d5db",
-          "--yws-bubble-light": "#374151",
-          "--yws-bubble-dark": "#111827",
-          "--yws-bubble-white": "#ffffff",
-          "--yws-border": "rgba(255,255,255,0.12)",
-          "--yws-shadow": "rgba(0,0,0,0.24)",
-        } as React.CSSProperties)
-
-  // Figma-exported assets
-  const imgFrame2147223205 = "/professional-woman-avatar-with-short-brown-hair-an.jpg"
-  const imgFrame2147223206 = "/professional-man-avatar-with-beard-and-glasses-loo.jpg"
-  const imgFrame2147223207 = "/professional-person-avatar-with-curly-hair-and-war.jpg"
-  const imgArrowUp =
-    "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='20' viewBox='0 0 24 24' fill='none' stroke='currentColor' strokeWidth='3' strokeLinecap='round' strokeLinejoin='round'%3E%3Cpath d='m5 12 7-7 7 7'/%3E%3Cpath d='M12 19V5'/%3E%3C/svg%3E"
-
   return (
     <div
       className={className}
-      style={
-        {
-          width,
-          height,
-          position: "relative",
-          background: "transparent",
-          ...themeVars,
-        } as React.CSSProperties
-      }
+      style={{
+        width,
+        height,
+        position: "relative",
+        background: "transparent",
+      }}
       role="img"
-      aria-label="Chat conversation showing team collaboration sync"
+      aria-label="PR review conversation showing GitBee moderation"
     >
       {/* Root frame size 482×300 – content centered */}
       <div
@@ -79,9 +43,15 @@ const YourWorkInSync: React.FC<YourWorkInSyncProps> = ({
           height: "216px",
         }}
       >
-        {/* Remove the flip transformation and position messages normally */}
-        <div style={{ width: "356px", height: "216px", position: "relative", transform: "scale(1.1)" }}>
-          {/* Message 1: Left side with avatar */}
+        <div
+          style={{
+            width: "356px",
+            height: "216px",
+            position: "relative",
+            transform: "scale(1.1)",
+          }}
+        >
+          {/* Message 1: GitBee bot message - left */}
           <div
             style={{
               position: "absolute",
@@ -94,23 +64,34 @@ const YourWorkInSync: React.FC<YourWorkInSyncProps> = ({
               height: "36px",
             }}
           >
-            {/* Avatar */}
+            {/* Bot Avatar */}
             <div
               style={{
                 width: "36px",
                 height: "36px",
                 borderRadius: "44px",
-                backgroundImage: `url('${imgFrame2147223205}')`,
-                backgroundSize: "cover",
-                backgroundPosition: "center",
-                border: "1px solid var(--yws-border)",
+                background: "#1a1a1a",
+                border: "1px solid #eab308",
                 flexShrink: 0,
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
               }}
-            />
+            >
+              <img
+                src="/gitbee.png"
+                alt="GitBee"
+                style={{
+                  width: "24px",
+                  height: "24px",
+                }}
+              />
+            </div>
             {/* Message bubble */}
             <div
               style={{
-                background: theme === "light" ? "#e8e5e3" : "var(--yws-bubble-light)",
+                background: "#1a1a1a",
+                border: "1px solid rgba(255,255,255,0.15)",
                 borderRadius: "999px",
                 padding: "0px 12px",
                 height: "36px",
@@ -126,16 +107,16 @@ const YourWorkInSync: React.FC<YourWorkInSyncProps> = ({
                   fontSize: "13px",
                   lineHeight: "16px",
                   letterSpacing: "-0.4px",
-                  color: theme === "light" ? "#37322f" : "var(--yws-text-primary)",
+                  color: "#fde047",
                   whiteSpace: "nowrap",
                 }}
               >
-                Team updates flow seamlessly
+                Checking PR relevance...
               </span>
             </div>
           </div>
 
-          {/* Message 2: Right side with avatar */}
+          {/* Message 2: Spam PR detected - right */}
           <div
             style={{
               position: "absolute",
@@ -150,7 +131,8 @@ const YourWorkInSync: React.FC<YourWorkInSyncProps> = ({
             {/* Message bubble */}
             <div
               style={{
-                background: theme === "light" ? "#37322f" : "var(--yws-bubble-dark)",
+                background: "rgba(239,68,68,0.2)",
+                border: "1px solid rgba(239,68,68,0.3)",
                 borderRadius: "999px",
                 padding: "0px 12px",
                 height: "36px",
@@ -166,29 +148,47 @@ const YourWorkInSync: React.FC<YourWorkInSyncProps> = ({
                   fontSize: "13px",
                   lineHeight: "16px",
                   letterSpacing: "-0.4px",
-                  color: "#ffffff",
+                  color: "#FCA5A5",
                   whiteSpace: "nowrap",
                 }}
               >
-                Hi everyone
+                Spam PR detected
               </span>
             </div>
-            {/* Avatar */}
+            {/* Warning icon */}
             <div
               style={{
                 width: "36px",
                 height: "36px",
                 borderRadius: "44px",
-                backgroundImage: `url('${imgFrame2147223206}')`,
-                backgroundSize: "cover",
-                backgroundPosition: "center",
-                border: "1px solid var(--yws-border)",
+                background: "rgba(239,68,68,0.2)",
+                border: "1px solid rgba(239,68,68,0.3)",
                 flexShrink: 0,
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                fontSize: "16px",
               }}
-            />
+            >
+              <svg
+                width="18"
+                height="18"
+                viewBox="0 0 24 24"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  d="M18 6L6 18M6 6l12 12"
+                  stroke="#EF4444"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+              </svg>
+            </div>
           </div>
 
-          {/* Message 3: Left side with avatar */}
+          {/* Message 3: GitBee action - left */}
           <div
             style={{
               position: "absolute",
@@ -197,27 +197,38 @@ const YourWorkInSync: React.FC<YourWorkInSyncProps> = ({
               display: "flex",
               gap: "10px",
               alignItems: "flex-start",
-              width: "210px",
+              width: "280px",
               height: "36px",
             }}
           >
-            {/* Avatar */}
+            {/* Bot Avatar */}
             <div
               style={{
                 width: "36px",
                 height: "36px",
                 borderRadius: "44px",
-                backgroundImage: `url('${imgFrame2147223207}')`,
-                backgroundSize: "cover",
-                backgroundPosition: "center",
-                border: "1px solid var(--yws-border)",
+                background: "#1a1a1a",
+                border: "1px solid #eab308",
                 flexShrink: 0,
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
               }}
-            />
+            >
+              <img
+                src="/gitbee.png"
+                alt="GitBee"
+                style={{
+                  width: "24px",
+                  height: "24px",
+                }}
+              />
+            </div>
             {/* Message bubble */}
             <div
               style={{
-                background: theme === "light" ? "#e8e5e3" : "var(--yws-bubble-light)",
+                background: "rgba(34,197,94,0.15)",
+                border: "1px solid rgba(34,197,94,0.3)",
                 borderRadius: "999px",
                 padding: "0px 12px",
                 height: "36px",
@@ -233,20 +244,20 @@ const YourWorkInSync: React.FC<YourWorkInSyncProps> = ({
                   fontSize: "13px",
                   lineHeight: "16px",
                   letterSpacing: "-0.4px",
-                  color: theme === "light" ? "#37322f" : "var(--yws-text-primary)",
+                  color: "#86EFAC",
                   whiteSpace: "nowrap",
                 }}
               >
-                How about this instead?
+                PR auto-closed with explanation
               </span>
             </div>
           </div>
 
-          {/* Message 4: Center with send button */}
+          {/* Message 4: Status update - center */}
           <div
             style={{
               position: "absolute",
-              left: "146px",
+              left: "120px",
               top: "180px",
               display: "flex",
               gap: "10px",
@@ -257,15 +268,16 @@ const YourWorkInSync: React.FC<YourWorkInSyncProps> = ({
             {/* Message bubble */}
             <div
               style={{
-                background: "#ffffff",
+                background: "#1a1a1a",
                 borderRadius: "16px",
                 padding: "0px 12px",
                 height: "36px",
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
-                boxShadow: "0px 0px 0px 1px rgba(0,0,0,0.08), 0px 1px 2px -0.4px rgba(0,0,0,0.08)",
+                boxShadow: "0px 0px 0px 1px rgba(255,255,255,0.1)",
                 overflow: "hidden",
+                border: "1px solid rgba(255,255,255,0.15)",
               }}
             >
               <span
@@ -274,43 +286,48 @@ const YourWorkInSync: React.FC<YourWorkInSyncProps> = ({
                   fontWeight: 400,
                   fontSize: "14px",
                   lineHeight: "20px",
-                  color: "#030712",
+                  color: "#e5e5e5",
                   whiteSpace: "nowrap",
                 }}
               >
-                Great work, everyone!
+                Community protected
               </span>
             </div>
-            {/* Send button */}
+            {/* Check button */}
             <div
               style={{
                 width: "36px",
                 height: "36px",
                 borderRadius: "44px",
-                background: theme === "light" ? "#37322f" : "var(--yws-bubble-dark)",
+                background: "rgba(34,197,94,0.2)",
+                border: "1px solid rgba(34,197,94,0.3)",
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
-                boxShadow: "0px 1px 2px 0px rgba(0,0,0,0.08)",
-                cursor: "pointer",
                 flexShrink: 0,
               }}
             >
-              <img
-                src={imgArrowUp || "/placeholder.svg"}
-                alt="Send"
-                style={{
-                  width: "20px",
-                  height: "20px",
-                  filter: "brightness(0) invert(1)",
-                }}
-              />
+              <svg
+                width="18"
+                height="18"
+                viewBox="0 0 24 24"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  d="M20 6L9 17l-5-5"
+                  stroke="#22C55E"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+              </svg>
             </div>
           </div>
         </div>
       </div>
     </div>
-  )
-}
+  );
+};
 
-export default YourWorkInSync
+export default YourWorkInSync;
