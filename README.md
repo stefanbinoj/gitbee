@@ -16,9 +16,15 @@ GitBee helps maintainers save hours every week by automating repetitive moderati
 
 This project is built as a monorepo using [Turborepo](https://turborepo.com/).
 
-- **Web**: Next.js application
-- **Docs**: Next.js documentation site
-- **Bot**: The core moderation bot logic
+- **Next.js**: The React framework for the web application.
+- **ElysiaJS**: Fast, and friendly Bun web framework for the bot/backend.
+- **OpenRouter**: Unified interface for LLMs.
+- **Drizzle**: TypeScript ORM for interacting with the database.
+- **LanceDB**: Vector database for semantic search and AI features.
+- **AI SDK**: The TypeScript library for building AI-powered applications.
+- **LangGraph**: Framework for building stateful, multi-actor applications with LLMs.
+- **Better Auth**: Comprehensive authentication library.
+- **LangFuse**: Open source LLM engineering platform for observability and analytics.
 
 ## Getting Started
 
