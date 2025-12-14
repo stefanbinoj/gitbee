@@ -14,6 +14,7 @@ import { Button } from "./components/ui/button";
 import { authClient } from "@/lib/authClient";
 import UpdatePricingSection from "./components/update-pricing-section";
 import { useRouter } from "next/navigation";
+import Image from "next/image";
 
 // Reusable Badge Component
 function Badge({ icon, text }: { icon: React.ReactNode; text: string }) {
@@ -322,10 +323,11 @@ export default function LandingPage() {
                               : "opacity-0 scale-95 blur-sm"
                           }`}
                         >
-                          <img
-                            src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/dsadsadsa.jpg-xTHS4hGwCWp2H5bTj8np6DXZUyrxX7.jpeg"
-                            alt="Schedules Dashboard - Customer Subscription Management"
-                            className="w-full h-full object-cover"
+                          <Image
+                            src="/img-1.png"
+                            alt="img1"
+                            fill
+                            className=""
                           />
                         </div>
 
@@ -337,10 +339,11 @@ export default function LandingPage() {
                               : "opacity-0 scale-95 blur-sm"
                           }`}
                         >
-                          <img
-                            src="/analytics-dashboard-with-charts-graphs-and-data-vi.jpg"
-                            alt="Analytics Dashboard"
-                            className="w-full h-full object-cover"
+                          <Image
+                            src="/img-2.png"
+                            alt="img2"
+                            fill
+                            className=""
                           />
                         </div>
 
@@ -352,9 +355,10 @@ export default function LandingPage() {
                               : "opacity-0 scale-95 blur-sm"
                           }`}
                         >
-                          <img
-                            src="/data-visualization-dashboard-with-interactive-char.jpg"
-                            alt="Data Visualization Dashboard"
+                          <Image
+                            src="/img-3.png"
+                            alt="img3"
+                            fill
                             className="w-full h-full object-contain" // Changed from object-cover to object-contain to preserve landscape aspect ratio
                           />
                         </div>
